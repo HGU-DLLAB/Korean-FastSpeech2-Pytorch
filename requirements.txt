@@ -9,3 +9,5 @@ unidecode == 1.1.1
 inflect == 4.1.0
 g2p-en == 2.1.0
 tensorboard== 2.2.2
+jamo == 0.4.1
+

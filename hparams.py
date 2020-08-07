@@ -1,8 +1,10 @@
 import os
 ### kss ###
 dataset = "kss"
-data_path = "/home/sjkim/FastSpeech2/data/kss_dataset"
-meta_data_path = "/home/sjkim/FastSpeech2/data/kss_dataset/metadata.csv"
+data_path = os.path.join("/home/minsu/dataset/", dataset)
+meta_name = "transcript.v.1.4.txt"
+textgrid_name = "TextGrid.zip"
+
 
 # Text
 text_cleaners = ['korean_cleaners']
@@ -44,7 +46,7 @@ max_seq_len = 1000
 f0_min = 71.0
 f0_max = 768.2
 energy_min = 0.0
-energy_max = 283.7
+energy_max = 0.008
 n_bins = 256
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import tgt
-from scipy.io.wavfile import read
+import librosa
 import pyworld as pw
 import torch
 import audio as Audio
@@ -10,34 +10,30 @@ import hparams as hp
 from jamo import h2j
 import codecs
 
-def prepare_align(in_dir):
-    with open(os.path.join(in_dir, 'metadata.csv'), encoding='utf-8') as f:
+def prepare_align(in_dir, meta):
+    with open(os.path.join(in_dir, meta), encoding='utf-8') as f:
         for line in f:
             parts = line.strip().split('|')
-            basename = parts[0]
-            text = parts[2]
+            basename, text = parts[0], parts[3]
 
             basename=basename.replace('.wav','.txt')
             
-            #with open(os.path.join(in_dir, 'wavs', '{}.txt'.format(basename)), 'w') as f1:
             with open(os.path.join(in_dir,'wavs',basename),'w') as f1:
                 f1.write(text)
 
-def build_from_path(in_dir, out_dir):
-    index = 1
-    train = list()
-    val = list()
-    f0_max = energy_max = 0
-    f0_min = energy_min = 1000000
+def build_from_path(in_dir, out_dir, meta):
+    train, val = list(), list()
+    f0_max, f0_min = energy_max, energy_min = 0, 1000000
     n_frames = 0
     
-    with open(os.path.join(in_dir, 'metadata.csv'), encoding='utf-8') as f:
-        for line in f:
+    with open(os.path.join(in_dir, meta), encoding='utf-8') as f:
+        for index, line in enumerate(f):
+
             parts = line.strip().split('|')
-            basename = parts[0]
-            text = parts[2]
-            basename=basename[2:]
+            basename, text = parts[0], parts[3]
+
             ret = process_utterance(in_dir, out_dir, basename)
+
             if ret is None:
                 continue
             else:
@@ -50,12 +46,9 @@ def build_from_path(in_dir, out_dir):
 
             if index % 100 == 0:
                 print("Done %d" % index)
-            index = index + 1
 
-            f0_max = max(f0_max, f_max)
-            f0_min = min(f0_min, f_min)
-            energy_max = max(energy_max, e_max)
-            energy_min = min(energy_min, e_min)
+            f0_max, f0_min = max(f0_max, f_max), min(f0_min, f_min)
+            energy_max, energy_min = max(energy_max, e_max), min(energy_min, e_min)
             n_frames += n
 
     with open(os.path.join(out_dir, 'stat.txt'), 'w', encoding='utf-8') as f:
@@ -65,15 +58,20 @@ def build_from_path(in_dir, out_dir):
                 'Max F0: {}'.format(f0_max),
                 'Min energy: {}'.format(energy_min),
                 'Max energy: {}'.format(energy_max)]
+
         for s in strs:
             print(s)
             f.write(s+'\n')
 
     return [r for r in train if r is not None], [r for r in val if r is not None]
 
+
 def process_utterance(in_dir, out_dir, basename):
     basename=basename.replace('.wav','')
     wav_path = os.path.join(in_dir, 'wavs', '{}.wav'.format(basename))
+    if "/" in basename:
+        basename = basename[2:]
+
     tg_path = os.path.join(out_dir, 'TextGrid', '{}.TextGrid'.format(basename)) 
     
     # Get alignments
@@ -87,7 +85,7 @@ def process_utterance(in_dir, out_dir, basename):
         return None
 
     # Read and trim wav files
-    _, wav = read(wav_path)
+    wav, _ = librosa.load(wav_path, sr=hp.sampling_rate)
     wav = wav[int(hp.sampling_rate*start):int(hp.sampling_rate*end)].astype(np.float32)
      
     # Compute fundamental frequency
@@ -98,6 +96,7 @@ def process_utterance(in_dir, out_dir, basename):
     mel_spectrogram, energy = Audio.tools.get_mel_from_wav(torch.FloatTensor(wav))
     mel_spectrogram = mel_spectrogram.numpy().astype(np.float32)[:, :sum(duration)]
     energy = energy.numpy().astype(np.float32)[:sum(duration)]
+
     if mel_spectrogram.shape[1] >= hp.max_seq_len:
         return None
 
