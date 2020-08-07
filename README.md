@@ -2,7 +2,8 @@
 
 ![](./assets/model.png)
 
-## Introduction
+# Introduction
+
 이 프로젝트는 Microsoft의 [**FastSpeech 2(Y. Ren et. al., 2020)**](https://arxiv.org/abs/2006.04558)를 [**Korean Single Speech dataset (이하 KSS dataset)**](https://www.kaggle.com/bryanpark/korean-single-speaker-speech-dataset)에서 동작하도록 구현한 것입니다. 본 소스코드는 ming024님의 [FastSpeech2](https://github.com/ming024/FastSpeech2) 코드를 기반으로 하였고, [Montreal Forced Aligner](https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner)를 이용하여 duration 을 추출해 구현되었습니다.
 
 본 프로젝트에서는 아래와 같은 contribution을 제공합니다.
@@ -11,7 +12,8 @@
 * kss dataset에 대해 학습한 pretrained model (제공 예정)
     
 
-## Install Dependencies
+# Install Dependencies
+
 먼저, 필요한 모듈을 pip를 이용하여 설치합니다.
 ```
 pip install -r requirements.txt
@@ -26,7 +28,7 @@ pip install -r requirements.txt
     pip install torch===1.6.0 torchvision===0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
     ```
 
-## Preprocessing
+# Preprocessing
 
 **(1) kss dataset download**
 * [Korean-Single-Speech dataset](https://www.kaggle.com/bryanpark/korean-single-speaker-speech-dataset): 12,853개(약 12시간)의 샘플로 구성된 한국어 여성 단일화자 발화 dataset입니다.
@@ -47,42 +49,42 @@ data 전처리를 위해 위의 커맨드를 입력해 주세요. 전처리 된 
 preprocessing 후에 ``hp.preprocessed_path/stat.txt`` 파일을 확인해 주세요. 그리고 ``hparams.py``의 f0_min, f0_max, energy_min, energy_max 변수를 업데이트해 주세요.
 
     
-## Train
+# Train
 모델 학습을 진행하기 위한 커맨드는 다음과 같습니다.
 ```
 python train.py
 ```
 학습된 모델은 ``ckpt/``에 저장되고 tensorboard log는 ``log/``에 저장됩니다. 학습시 evaluate 과정에서 생성된 음성은 ``synth/`` 폴더에 저장됩니다.
 
-## Synthesis
+# Synthesis
 학습된 파라미터를 기반으로 음성을 생성하는 명령어는 다음과 같습니다. 
 ```
 python synthesis.py --step 300000
 ```
 합성된 음성은  ```results/``` directory에서 확인하실 수 있습니다.
 
-## Pretrained model
+# Pretrained model
 사전학습된 모델은 합성 음성의 기계음 이슈를 해결한 후 공개할 예정입니다.
 
 
-## Tensorboard
+# Tensorboard
 ```
 tensorboard --logdir log/hp.dataset/
 ```
 tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러므로 위의 커멘드를 이용하여 tensorboard를 실행해 학습 상황을 모니터링 하실 수 있습니다.
 
-## Issues and TODOs
+# Issues and TODOs
 - pitch, energy loss가 total loss의 대부분을 차지하여 개선 중에 있음.
 - 생성된 음성에서의 기계음 문제
 - pretrained model 업로드
 - [other issues](https://github.com/ming024/FastSpeech2) from ming024's implementation
 
 
-## Acknowledgements
+# Acknowledgements
 We specially thank to ming024 for providing FastSpeech2 pytorch-implentation. This work is mostly based on **the undergraduate researcher, Joshua-1995(김성재)**'s efforts. We also thank to him for his devotion.
 
 
-## References
+# References
 - [FastSpeech 2: Fast and High-Quality End-to-End Text to Speech](https://arxiv.org/abs/2006.04558), Y. Ren, *et al*.
 - [FastSpeech: Fast, Robust and Controllable Text to Speech](https://arxiv.org/abs/1905.09263), Y. Ren, *et al*.
 - [ming024's FastSpeech2 impelmentation](https://github.com/ming024/FastSpeech2)
