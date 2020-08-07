@@ -47,6 +47,7 @@ python preprocess.py
 data 전처리를 위해 위의 커맨드를 입력해 주세요. 전처리 된 데이터는 프로젝트 폴더의 ``preprocessed/`` 폴더에 생성됩니다.
     
 **(4) ``stat.txt``확인 후 ``hparams.py``를  update** 
+
 preprocessing 후에 ``hp.preprocessed_path/stat.txt`` 파일을 확인해 주세요. 그리고 ``hparams.py``의 f0_min, f0_max, energy_min, energy_max 변수를 업데이트해 주세요.
 
     
