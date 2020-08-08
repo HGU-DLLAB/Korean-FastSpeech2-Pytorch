@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import tgt
-import librosa
+from scipy.io.wavfile import read
 import pyworld as pw
 import torch
 import audio as Audio
@@ -67,11 +67,13 @@ def build_from_path(in_dir, out_dir, meta):
 
 
 def process_utterance(in_dir, out_dir, basename):
-    basename=basename.replace('.wav','')
+    wav_basename=basename.replace('.wav','')
+    basename = wav_basename[2:]
+    wav_bak_path = os.path.join(in_dir, "wavs_bak", "{}.wav".format(wav_basename))
     wav_path = os.path.join(in_dir, 'wavs', '{}.wav'.format(basename))
-    if "/" in basename:
-        basename = basename[2:]
 
+    # Convert kss data into PCM encoded wavs
+    os.system("ffmpeg -i {} -ac 1 -ar 22050 {}".format(wav_bak_path, wav_path))    
     tg_path = os.path.join(out_dir, 'TextGrid', '{}.TextGrid'.format(basename)) 
     
     # Get alignments
@@ -85,9 +87,9 @@ def process_utterance(in_dir, out_dir, basename):
         return None
 
     # Read and trim wav files
-    wav, _ = librosa.load(wav_path, sr=hp.sampling_rate)
+    _, wav = read(wav_path)
     wav = wav[int(hp.sampling_rate*start):int(hp.sampling_rate*end)].astype(np.float32)
-     
+
     # Compute fundamental frequency
     f0, _ = pw.dio(wav.astype(np.float64), hp.sampling_rate, frame_period=hp.hop_length/hp.sampling_rate*1000)
     f0 = f0[:sum(duration)]

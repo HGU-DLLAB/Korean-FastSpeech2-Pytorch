@@ -40,6 +40,10 @@ def main():
 
 
     if hp.dataset == "kss":
+        if not os.path.exists(os.path.join(in_dir, "wavs_bak")):
+            os.system("mv {} {}".format(os.path.join(in_dir, "wavs"), os.path.join(in_dir, "wavs_bak")))        
+            os.makedirs(os.path.join(in_dir, "wavs"))
+
         train, val = korean.build_from_path(in_dir, out_dir, meta)
 
     write_metadata(train, val, out_dir)

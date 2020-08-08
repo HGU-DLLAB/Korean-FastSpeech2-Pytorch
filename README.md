@@ -12,11 +12,19 @@
     
 
 ## Install Dependencies
-먼저, 필요한 모듈을 pip를 이용하여 설치합니다.
+
+먼저, ffmpeg를 설치합니다.
+```
+sudo apt-get install ffmpeg
+```
+
+
+다음으로, 필요한 모듈을 pip를 이용하여 설치합니다.
 ```
 pip install -r requirements.txt
 ```
-다음으로, pytorch version 1.6을 설치합니다. 
+
+마지막으로, pytorch version 1.6을 설치합니다. 
 * [권장] anaconda 가상환경 사용시,
     ```
     conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
