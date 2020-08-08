@@ -12,7 +12,7 @@
 * kss dataset에 대해 학습한 pretrained model (제공 예정)
     
 
-## Install Dependencies
+# Install Dependencies
 
 먼저, ffmpeg를 설치합니다.
 ```
@@ -24,15 +24,10 @@ sudo apt-get install ffmpeg
 pip install -r requirements.txt
 ```
 
-마지막으로, pytorch version 1.6을 설치합니다. 
-* [권장] anaconda 가상환경 사용시,
-    ```
-    conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
-    ```
-* pip 이용시,
-    ```
-    pip install torch===1.6.0 torchvision===0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
-    ```
+마지막으로, pytorch version 1.6 (nightly version)을 설치합니다. 
+```
+pip install --pre torch==1.6.0.dev20200428 -f https://download.pytorch.org/whl/nightly/cu102/torch_nightly.html
+```
 
 # Preprocessing
 

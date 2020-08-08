@@ -46,7 +46,7 @@ max_seq_len = 1000
 f0_min = 71.0
 f0_max = 768.2
 energy_min = 0.0
-energy_max = 0.008
+energy_max = 283.72
 n_bins = 256
 
 
