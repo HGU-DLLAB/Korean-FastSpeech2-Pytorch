@@ -1,6 +1,6 @@
 import os
 ### kss ###
-dataset = "kss_v_1.4"
+dataset = "kss"
 data_path = os.path.join("/home/minsu/dataset/", dataset)
 meta_name = "transcript.v.1.4.txt"	# "transcript.v.1.4.txt" or "transcript.v.1.3.txt" 
 textgrid_name = "TextGrid.zip"
