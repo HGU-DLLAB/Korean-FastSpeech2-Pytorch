@@ -185,3 +185,8 @@ def pad(input_ele, mel_max_length=None):
         out_list.append(one_batch_padded)
     out_padded = torch.stack(out_list)
     return out_padded
+
+def min_max_norm(x, min_val, max_val):
+    return (x - min_val) / (max_val - min_val)
+
+

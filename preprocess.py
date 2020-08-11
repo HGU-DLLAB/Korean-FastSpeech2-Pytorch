@@ -39,7 +39,7 @@ def main():
         os.system('unzip {} -d {}'.format(os.path.join(out_dir, textgrid_name), out_dir))
 
 
-    if hp.dataset == "kss":
+    if "kss" in hp.dataset:
         # kss version 1.3
         if "v.1.3" in meta:
             if not os.path.exists(os.path.join(in_dir, "wavs_bak")):

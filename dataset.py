@@ -7,7 +7,7 @@ import os
 
 import hparams
 import audio as Audio
-from utils import pad_1D, pad_2D, process_meta
+from utils import pad_1D, pad_2D, process_meta, min_max_norm
 from text import text_to_sequence, sequence_to_text
 import time
 
@@ -48,13 +48,14 @@ class Dataset(Dataset):
                   "energy": energy}
         return sample
 
+
     def reprocess(self, batch, cut_list):
         ids = [batch[ind]["id"] for ind in cut_list]
         texts = [batch[ind]["text"] for ind in cut_list]
         mel_targets = [batch[ind]["mel_target"] for ind in cut_list]
         Ds = [batch[ind]["D"] for ind in cut_list]
-        f0s = [batch[ind]["f0"] for ind in cut_list]
-        energies = [batch[ind]["energy"] for ind in cut_list]
+        f0s = [ self.min_max_norm(batch[ind]["f0"], min_val=hparams.f0_min, max_val=hparams.f0_max)   for ind in cut_list]
+        energies = [ self.min_max_norm(batch[ind]["energy"], min_val=hparams.energy_min, max_val=hparams.energy_max)   for ind in cut_list]
         for text, D, id_ in zip(texts, Ds, ids):
             if len(text) != len(D):
                 print('the dimension of text and duration should be the same')

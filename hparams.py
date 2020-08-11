@@ -1,6 +1,6 @@
 import os
 ### kss ###
-dataset = "kss"
+dataset = "kss_v_1.4"
 data_path = os.path.join("/home/minsu/dataset/", dataset)
 meta_name = "transcript.v.1.4.txt"	# "transcript.v.1.4.txt" or "transcript.v.1.3.txt" 
 textgrid_name = "TextGrid.zip"
@@ -19,8 +19,8 @@ win_length = 1024
 ### kss ###
 max_wav_value = 32768.0
 n_mel_channels = 80
-mel_fmin = 20
-mel_fmax = 7800
+mel_fmin = 80
+mel_fmax = 7600
 
 # FastSpeech 2
 encoder_layer = 4

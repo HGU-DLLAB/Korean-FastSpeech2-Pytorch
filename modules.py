@@ -25,7 +25,10 @@ class VarianceAdaptor(nn.Module):
         self.length_regulator = LengthRegulator()
         self.pitch_predictor = VariancePredictor()
         self.energy_predictor = VariancePredictor()
-        
+
+        self.weight_pitch = nn.Parameter(torch.tensor([1.]), requires_grad=True)
+        self.weight_energy = nn.Parameter(torch.tensor([1.]), requires_grad=True)
+      
         self.pitch_bins = nn.Parameter(torch.exp(torch.linspace(np.log(hp.f0_min), np.log(hp.f0_max), hp.n_bins-1)))
         self.energy_bins = nn.Parameter(torch.linspace(hp.energy_min, hp.energy_max, hp.n_bins-1))
         self.pitch_embedding = nn.Embedding(hp.n_bins, hp.encoder_hidden)
@@ -53,7 +56,7 @@ class VarianceAdaptor(nn.Module):
         else:
             energy_embedding = self.energy_embedding(torch.bucketize(energy_prediction, self.energy_bins))
         
-        x = x + pitch_embedding + energy_embedding
+        x = x + self.weight_pitch * pitch_embedding + self.weight_energy * energy_embedding
         
         return x, log_duration_prediction, pitch_prediction, energy_prediction, mel_len, mel_mask
 
