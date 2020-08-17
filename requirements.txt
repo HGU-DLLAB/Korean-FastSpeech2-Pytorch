@@ -1,20 +1,17 @@
 absl-py==0.9.0
 aniso8601==8.0.0
-appdirs==1.4.3
-asn1crypto==1.3.0
+appdirs==1.4.4
 audioread==2.1.8
 beautifulsoup4==4.6.0
 cachetools==4.1.1
-certifi==2020.4.5.2
-cffi==1.14.0
+certifi==2020.6.20
+cffi==1.14.2
 chardet==3.0.4
 click==7.1.2
 colorama==0.4.3
 coloredlogs==14.0
-cryptography==2.9.2
 cycler==0.10.0
 Cython==0.29.21
-daal4py==2020.2
 decorator==4.4.2
 Distance==0.1.3
 dnspython==1.16.0
@@ -27,7 +24,7 @@ Flask-RESTful==0.3.8
 Flask-SocketIO==4.3.1
 flask-talisman==0.7.0
 future==0.18.2
-g2p==0.5.20200421
+g2p==0.5.20200814
 g2p-en==2.1.0
 g2pK==0.9.4
 google-auth==1.20.1
@@ -36,24 +33,23 @@ greenlet==0.4.16
 grpcio==1.31.0
 gunicorn==20.0.4
 humanfriendly==8.2
-idna @ file:///workdir/conda-build/idna_1593149218650/work
+idna==2.10
 importlib-metadata==1.7.0
 inflect==4.1.0
 itsdangerous==1.1.0
 jamo==0.4.1
 jdcal==1.4.1
 Jinja2==2.11.2
-joblib @ file:///workdir/conda-build/joblib_1593155035855/work
+joblib==0.16.0
 JPype1==1.0.2
-kiwisolver @ file:///workdir/conda-build/kiwisolver_1593151527638/work
+kiwisolver==1.2.0
 konlpy==0.5.2
-librosa @ file:///home/conda/feedstock_root/build_artifacts/librosa_1595413403988/work
-llvmlite==0.32.1+0.gaa11b12.dirty
+librosa==0.8.0
+llvmlite==0.34.0
 lxml==4.5.2
 Markdown==3.2.2
 MarkupSafe==1.1.1
-matplotlib @ file:///tmp/build/80754af9/matplotlib-base_1592406090020/work
-mecab-python @ file:///tmp/mecab-python-0.996
+matplotlib==3.3.1
 mkl-fft==1.1.0
 mkl-random==1.1.1
 mkl-service==2.3.0
@@ -61,21 +57,22 @@ monotonic==1.5
 munkres==1.1.2
 networkx==2.4
 nltk==3.5
-numba==0.49.1+0.gd2cac8597.dirty
-numpy==1.19.0
+numba==0.51.0
+numpy==1.19.1
 oauthlib==3.1.0
+olefile==0.46
 openpyxl==3.0.4
 packaging==20.4
 panphon==0.17
-pooch @ file:///home/conda/feedstock_root/build_artifacts/pooch_1589455514164/work
-protobuf==3.12.4
+Pillow==7.2.0
+pooch==1.1.1
+protobuf==3.13.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pybind11==2.5.0
 pycparser==2.20
-pyOpenSSL==19.1.0
 pyparsing==2.4.7
-PySocks==1.7.0
+PySocks==1.7.1
 python-dateutil==2.8.1
 python-engineio==3.13.1
 python-mecab-ko==1.0.9
@@ -84,26 +81,26 @@ pytz==2020.1
 pyworld==0.2.10
 PyYAML==5.3.1
 regex==2020.7.14
-requests==2.23.0
+requests==2.24.0
 requests-oauthlib==1.3.0
 resampy==0.2.2
 rsa==4.6
-scikit-learn==0.23.1
-scipy==1.5.0
+scikit-learn==0.23.2
+scipy==1.5.2
 six @ file:///workdir/conda-build/six_1593148849096/work
-SoundFile==0.10.2
+SoundFile==0.10.3.post1
 TBB==0.1
 tensorboard==2.3.0
 tensorboard-plugin-wit==1.7.0
 tgt==1.4.4
 threadpoolctl==2.1.0
-torch==1.6.0.dev20200428
-tornado==6.0.4
+torch==1.6.0
+torchvision==0.7.0
 tqdm==4.48.2
 tweepy==3.9.0
 typing-extensions==3.7.4.2
 unicodecsv==0.14.1
 Unidecode==1.1.1
-urllib3==1.25.9
+urllib3==1.25.10
 Werkzeug==1.0.1
 zipp==3.1.0
