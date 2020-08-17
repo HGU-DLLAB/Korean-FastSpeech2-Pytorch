@@ -45,7 +45,7 @@ class VarianceAdaptor(nn.Module):
         energy_prediction = self.energy_predictor(x, mel_mask)
         energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))
         
-        x = x + self.weight_pitch * pitch_embedding + self.weight_energy * energy_embedding
+        x = x + pitch_embedding + energy_embedding
         
         return x, log_duration_prediction, pitch_prediction, energy_prediction, mel_len, mel_mask
 

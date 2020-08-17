@@ -21,6 +21,13 @@ n_mel_channels = 80
 mel_fmin = 0
 mel_fmax = 8000
 
+f0_min = 71.0
+f0_max = 792.8
+energy_min = 0.0
+energy_max = 283.72
+
+
+
 # FastSpeech 2
 encoder_layer = 4
 encoder_head = 2
@@ -39,19 +46,6 @@ variance_predictor_dropout = 0.5
 
 max_seq_len = 1000
 
-
-<<<<<<< HEAD
-=======
-# Quantization for F0 and energy
-### kss ###
-f0_min = 71.0
-f0_max = 792.8
-energy_min = 0.0
-energy_max = 283.72
-n_bins = 256
-
-
->>>>>>> 9b8f09021474fd99c4766b66cccf23c7ecdd9258
 # Checkpoints and synthesis path
 preprocessed_path = os.path.join("./preprocessed/", dataset)
 checkpoint_path = os.path.join("./ckpt/", dataset)

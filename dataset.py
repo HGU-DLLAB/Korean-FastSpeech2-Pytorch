@@ -59,13 +59,9 @@ class Dataset(Dataset):
         texts = [batch[ind]["text"] for ind in cut_list]
         mel_targets = [standard_norm(batch[ind]["mel_target"], self.mean_mel, self.std_mel, is_mel=True) for ind in cut_list]
         Ds = [batch[ind]["D"] for ind in cut_list]
-<<<<<<< HEAD
         f0s = [standard_norm(batch[ind]["f0"], self.mean_f0, self.std_f0) for ind in cut_list]
         energies = [standard_norm(batch[ind]["energy"], self.mean_energy, self.std_energy) for ind in cut_list]
-=======
-        f0s = [ min_max_norm(batch[ind]["f0"], min_val=hparams.f0_min, max_val=hparams.f0_max)   for ind in cut_list]
-        energies = [ min_max_norm(batch[ind]["energy"], min_val=hparams.energy_min, max_val=hparams.energy_max)   for ind in cut_list]
->>>>>>> 9b8f09021474fd99c4766b66cccf23c7ecdd9258
+
         for text, D, id_ in zip(texts, Ds, ids):
             if len(text) != len(D):
                 print('the dimension of text and duration should be the same')
