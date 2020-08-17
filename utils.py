@@ -191,7 +191,6 @@ def pad(input_ele, mel_max_length=None):
     out_padded = torch.stack(out_list)
     return out_padded
 
-
 # from dathudeptrai's FastSpeech2 implementation
 def standard_norm(x, mean, std, is_mel=False):
 

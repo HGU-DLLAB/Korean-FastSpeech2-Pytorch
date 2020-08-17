@@ -29,7 +29,6 @@ class VarianceAdaptor(nn.Module):
         self.energy_embedding_producer = Conv(1, hp.encoder_hidden, kernel_size=9, bias=False, padding=4)    
         self.pitch_embedding_producer = Conv(1, hp.encoder_hidden, kernel_size=9, bias=False, padding=4)
 
-
     def forward(self, x, src_mask, mel_mask=None, duration_target=None, pitch_target=None, energy_target=None, max_len=None):
         log_duration_prediction = self.duration_predictor(x, src_mask)
         
@@ -46,7 +45,7 @@ class VarianceAdaptor(nn.Module):
         energy_prediction = self.energy_predictor(x, mel_mask)
         energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))
         
-        x = x + pitch_embedding + energy_embedding
+        x = x + self.weight_pitch * pitch_embedding + self.weight_energy * energy_embedding
         
         return x, log_duration_prediction, pitch_prediction, energy_prediction, mel_len, mel_mask
 

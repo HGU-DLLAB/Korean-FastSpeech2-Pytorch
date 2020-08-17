@@ -110,6 +110,7 @@ if __name__ == "__main__":
     g2p=G2p()
     print('which sentence do you want?')
     print('1.eval_sentence 2.train_sentence 3.test_sentence 4.create new sentence')
+
     mode=input()
     print('you went for mode {}'.format(mode))
     if mode=='4':
