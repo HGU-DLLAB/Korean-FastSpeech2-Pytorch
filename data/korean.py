@@ -5,10 +5,12 @@ from scipy.io.wavfile import read
 import pyworld as pw
 import torch
 import audio as Audio
-from utils import get_alignment
+from utils import get_alignment, standard_norm, remove_outlier
 import hparams as hp
 from jamo import h2j
 import codecs
+
+from sklearn.preprocessing import StandardScaler
 
 def prepare_align(in_dir, meta):
     with open(os.path.join(in_dir, meta), encoding='utf-8') as f:
@@ -23,7 +25,9 @@ def prepare_align(in_dir, meta):
 
 def build_from_path(in_dir, out_dir, meta):
     train, val = list(), list()
-    f0_max, f0_min = energy_max, energy_min = 0, 1000000
+
+    scalers = [StandardScaler(copy=False) for _ in range(3)]	# scalers for mel, f0, energy
+
     n_frames = 0
     
     with open(os.path.join(in_dir, meta), encoding='utf-8') as f:
@@ -32,12 +36,12 @@ def build_from_path(in_dir, out_dir, meta):
             parts = line.strip().split('|')
             basename, text = parts[0], parts[3]
 
-            ret = process_utterance(in_dir, out_dir, basename)
+            ret = process_utterance(in_dir, out_dir, basename, scalers)
 
             if ret is None:
                 continue
             else:
-                info, f_max, f_min, e_max, e_min, n = ret
+                info, n = ret
             
             if basename[0] == '1':
                 val.append(info)
@@ -47,26 +51,16 @@ def build_from_path(in_dir, out_dir, meta):
             if index % 100 == 0:
                 print("Done %d" % index)
 
-            f0_max, f0_min = max(f0_max, f_max), min(f0_min, f_min)
-            energy_max, energy_min = max(energy_max, e_max), min(energy_min, e_min)
             n_frames += n
 
-    with open(os.path.join(out_dir, 'stat.txt'), 'w', encoding='utf-8') as f:
-        strs = ['Total time: {} hours'.format(n_frames*hp.hop_length/hp.sampling_rate/3600),
-                'Total frames: {}'.format(n_frames),
-                'Min F0: {}'.format(f0_min),
-                'Max F0: {}'.format(f0_max),
-                'Min energy: {}'.format(energy_min),
-                'Max energy: {}'.format(energy_max)]
-
-        for s in strs:
-            print(s)
-            f.write(s+'\n')
+    param_list = [np.array([scaler.mean_, scaler.scale_]) for scaler in scalers]
+    param_name_list = ['mel_stat.npy', 'f0_stat.npy', 'energy_stat.npy']
+    [np.save(os.path.join(out_dir, param_name), param_list[idx]) for idx, param_name in enumerate(param_name_list)]
 
     return [r for r in train if r is not None], [r for r in val if r is not None]
 
 
-def process_utterance(in_dir, out_dir, basename):
+def process_utterance(in_dir, out_dir, basename, scalers):
     wav_bak_basename=basename.replace('.wav','')
     basename = wav_bak_basename[2:]
     wav_bak_path = os.path.join(in_dir, "wavs_bak", "{}.wav".format(wav_bak_basename))
@@ -118,5 +112,14 @@ def process_utterance(in_dir, out_dir, basename):
     # Save spectrogram
     mel_filename = '{}-mel-{}.npy'.format(hp.dataset, basename)
     np.save(os.path.join(out_dir, 'mel', mel_filename), mel_spectrogram.T, allow_pickle=False)
-    
-    return '|'.join([basename, text]), max(f0), min([f for f in f0 if f != 0]), max(energy), min(energy), mel_spectrogram.shape[1]
+   
+    mel_scaler, f0_scaler, energy_scaler = scalers
+
+    energy = remove_outlier(energy)
+    f0 = remove_outlier(f0)
+
+    mel_scaler.partial_fit(mel_spectrogram.T)
+    f0_scaler.partial_fit(f0[f0!=0].reshape(-1, 1))
+    energy_scaler.partial_fit(energy[energy != 0].reshape(-1, 1))
+
+    return '|'.join([basename, text]), mel_spectrogram.shape[1]

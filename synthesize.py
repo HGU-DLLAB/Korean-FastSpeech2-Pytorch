@@ -48,28 +48,42 @@ def get_FastSpeech2(num):
 
 def synthesize(model, waveglow, melgan, text, sentence, prefix=''):
     sentence = sentence[:10] # long filename will result in OS Error
-   
+
+    mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
+    mean_f0, std_f0 = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "f0_stat.npy")), dtype=torch.float).to(device)
+    mean_energy, std_energy = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "energy_stat.npy")), dtype=torch.float).to(device)
+
+    mean_mel, std_mel = mean_mel.reshape(1, -1), std_mel.reshape(1, -1)
+    mean_f0, std_f0 = mean_f0.reshape(1, -1), std_f0.reshape(1, -1)
+    mean_energy, std_energy = mean_energy.reshape(1, -1), std_energy.reshape(1, -1)
+
     src_len = torch.from_numpy(np.array([text.shape[1]])).to(device)
         
     mel, mel_postnet, log_duration_output, f0_output, energy_output, _, _, mel_len = model(text, src_len)
     
     mel_torch = mel.transpose(1, 2).detach()
     mel_postnet_torch = mel_postnet.transpose(1, 2).detach()
-    mel = mel[0].cpu().transpose(0, 1).detach()
-    mel_postnet = mel_postnet[0].cpu().transpose(0, 1).detach()
-    f0_output = f0_output[0].detach().cpu().numpy()
-    energy_output = energy_output[0].detach().cpu().numpy()
+    f0_output = f0_output[0]
+    energy_output = energy_output[0]
+
+    mel_torch = utils.de_norm(mel_torch.transpose(1, 2), mean_mel, std_mel)
+    mel_postnet_torch = utils.de_norm(mel_postnet_torch.transpose(1, 2), mean_mel, std_mel).transpose(1, 2)
+    f0_output = utils.de_norm(f0_output, mean_f0, std_f0).squeeze().detach().cpu().numpy()
+    energy_output = utils.de_norm(energy_output, mean_energy, std_energy).squeeze().detach().cpu().numpy()
+
+    print(f0_output)
 
     if not os.path.exists(hp.test_path):
         os.makedirs(hp.test_path)
 
-    Audio.tools.inv_mel_spec(mel_postnet, os.path.join(hp.test_path, '{}_griffin_lim_{}.wav'.format(prefix, sentence)))
+    print(mel_postnet_torch[0].shape)
+    Audio.tools.inv_mel_spec(mel_postnet_torch[0], os.path.join(hp.test_path, '{}_griffin_lim_{}.wav'.format(prefix, sentence)))
     if waveglow is not None:
         utils.waveglow_infer(mel_postnet_torch, waveglow, os.path.join(hp.test_path, '{}_{}_{}.wav'.format(prefix, hp.vocoder, sentence)))
     if melgan is not None:
         utils.melgan_infer(mel_postnet_torch, melgan, os.path.join(hp.test_path, '{}_{}_{}.wav'.format(prefix, hp.vocoder, sentence)))
     
-    utils.plot_data([(mel_postnet.numpy(), f0_output, energy_output)], ['Synthesized Spectrogram'], filename=os.path.join(hp.test_path, '{}_{}.png'.format(prefix, sentence)))
+    utils.plot_data([(mel_postnet_torch[0].detach().cpu().numpy(), f0_output, energy_output)], ['Synthesized Spectrogram'], filename=os.path.join(hp.test_path, '{}_{}.png'.format(prefix, sentence)))
 
 
 if __name__ == "__main__":

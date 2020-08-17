@@ -7,7 +7,7 @@ import os
 
 import hparams
 import audio as Audio
-from utils import pad_1D, pad_2D, process_meta
+from utils import pad_1D, pad_2D, process_meta, standard_norm
 from text import text_to_sequence, sequence_to_text
 import time
 
@@ -17,6 +17,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 class Dataset(Dataset):
     def __init__(self, filename="train.txt", sort=True):
         self.basename, self.text = process_meta(os.path.join(hparams.preprocessed_path, filename))
+        
+        self.mean_mel, self.std_mel = np.load(os.path.join(hparams.preprocessed_path, "mel_stat.npy"))
+        self.mean_f0, self.std_f0 = np.load(os.path.join(hparams.preprocessed_path, "f0_stat.npy"))
+        self.mean_energy, self.std_energy = np.load(os.path.join(hparams.preprocessed_path, "energy_stat.npy"))
+
         self.sort = sort
 
     def __len__(self):
@@ -51,10 +56,10 @@ class Dataset(Dataset):
     def reprocess(self, batch, cut_list):
         ids = [batch[ind]["id"] for ind in cut_list]
         texts = [batch[ind]["text"] for ind in cut_list]
-        mel_targets = [batch[ind]["mel_target"] for ind in cut_list]
+        mel_targets = [standard_norm(batch[ind]["mel_target"], self.mean_mel, self.std_mel, is_mel=True) for ind in cut_list]
         Ds = [batch[ind]["D"] for ind in cut_list]
-        f0s = [batch[ind]["f0"] for ind in cut_list]
-        energies = [batch[ind]["energy"] for ind in cut_list]
+        f0s = [standard_norm(batch[ind]["f0"], self.mean_f0, self.std_f0) for ind in cut_list]
+        energies = [standard_norm(batch[ind]["energy"], self.mean_energy, self.std_energy) for ind in cut_list]
         for text, D, id_ in zip(texts, Ds, ids):
             if len(text) != len(D):
                 print('the dimension of text and duration should be the same')

@@ -27,8 +27,17 @@ def get_FastSpeech2(num):
     return model
 
 def evaluate(model, step, vocoder=None):
+    model.eval()
     torch.manual_seed(0)
-    
+
+    mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
+    mean_f0, std_f0 = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "f0_stat.npy")), dtype=torch.float).to(device)
+    mean_energy, std_energy = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "energy_stat.npy")), dtype=torch.float).to(device)
+
+    eval_path = hp.eval_path
+    if not os.path.exists(eval_path):
+        os.makedirs(eval_path)
+
     # Get dataset
     dataset = Dataset("val.txt", sort=False)
     loader = DataLoader(dataset, batch_size=hp.batch_size**2, shuffle=False, collate_fn=dataset.collate_fn, drop_last=False, num_workers=0, )
@@ -73,38 +82,46 @@ def evaluate(model, step, vocoder=None):
                 e_l.append(e_loss.item())
                 mel_l.append(mel_loss.item())
                 mel_p_l.append(mel_postnet_loss.item())
-                
-                if vocoder is not None:
+
+                if idx == 0 and vocoder is not None:
                     # Run vocoding and plotting spectrogram only when the vocoder is defined
-                    for k in range(len(mel_target)):
+                    for k in range(1):
                         basename = id_[k]
                         gt_length = mel_len[k]
                         out_length = out_mel_len[k]
                         
-                        mel_target_torch = mel_target[k:k+1, :gt_length].transpose(1, 2).detach()
-                        mel_target_ = mel_target[k, :gt_length].cpu().transpose(0, 1).detach()
-                        
-                        mel_postnet_torch = mel_postnet_output[k:k+1, :out_length].transpose(1, 2).detach()
-                        mel_postnet = mel_postnet_output[k, :out_length].cpu().transpose(0, 1).detach()
-                        
+                        mel_target_torch = mel_target[k:k+1, :gt_length]
+                        mel_target_ = mel_target[k, :gt_length]
+                        mel_postnet_torch = mel_postnet_output[k:k+1, :out_length]
+                        mel_postnet = mel_postnet_output[k, :out_length]
+
+                        mel_target_torch = utils.de_norm(mel_target_torch, mean_mel, std_mel).transpose(1, 2).detach()
+                        mel_target_ = utils.de_norm(mel_target_, mean_mel, std_mel).cpu().transpose(0, 1).detach()
+                        mel_postnet_torch = utils.de_norm(mel_postnet_torch, mean_mel, std_mel).transpose(1, 2).detach()
+                        mel_postnet = utils.de_norm(mel_postnet, mean_mel, std_mel).cpu().transpose(0, 1).detach()
                         if hp.vocoder == 'melgan':
-                            utils.melgan_infer(mel_target_torch, vocoder, os.path.join(hp.eval_path, 'ground-truth_{}_{}.wav'.format(basename, hp.vocoder)))
+                            utils.melgan_infer(mel_target_torch, vocoder, os.path.join(hp.eval_path, 'eval_ground-truth_{}_{}.wav'.format(basename, hp.vocoder)))
                             utils.melgan_infer(mel_postnet_torch, vocoder, os.path.join(hp.eval_path, 'eval_{}_{}.wav'.format(basename, hp.vocoder)))
                         elif hp.vocoder == 'waveglow':
-                            utils.waveglow_infer(mel_target_torch, vocoder, os.path.join(hp.eval_path, 'ground-truth_{}_{}.wav'.format(basename, hp.vocoder)))
+                            utils.waveglow_infer(mel_target_torch, vocoder, os.path.join(hp.eval_path, 'eval_ground-truth_{}_{}.wav'.format(basename, hp.vocoder)))
                             utils.waveglow_infer(mel_postnet_torch, vocoder, os.path.join(hp.eval_path, 'eval_{}_{}.wav'.format(basename, hp.vocoder)))
-        
+
                         np.save(os.path.join(hp.eval_path, 'eval_{}_mel.npy'.format(basename)), mel_postnet.numpy())
                         
-                        f0_ = f0[k, :gt_length].detach().cpu().numpy()
-                        energy_ = energy[k, :gt_length].detach().cpu().numpy()
-                        f0_output_ = f0_output[k, :out_length].detach().cpu().numpy()
-                        energy_output_ = energy_output[k, :out_length].detach().cpu().numpy()
-                        
+                        f0_ = f0[k, :gt_length]
+                        energy_ = energy[k, :gt_length]
+                        f0_output_ = f0_output[k, :out_length]
+                        energy_output_ = energy_output[k, :out_length]
+                     
+                        f0_ = utils.de_norm(f0_, mean_f0, std_f0).detach().cpu().numpy()
+                        f0_output_ = utils.de_norm(f0_output, mean_f0, std_f0).detach().cpu().numpy()
+                        energy_ = utils.de_norm(energy_, mean_energy, std_energy).detach().cpu().numpy()
+                        energy_output_ = utils.de_norm(energy_output_, mean_energy, std_energy).detach().cpu().numpy()
+ 
                         utils.plot_data([(mel_postnet.numpy(), f0_output_, energy_output_), (mel_target_.numpy(), f0_, energy_)], 
                             ['Synthesized Spectrogram', 'Ground-Truth Spectrogram'], filename=os.path.join(hp.eval_path, 'eval_{}.png'.format(basename)))
                         idx += 1
-                
+                    print("done")
             current_step += 1            
 
     d_l = sum(d_l) / len(d_l)
@@ -135,6 +152,7 @@ def evaluate(model, step, vocoder=None):
         f_log.write(str5 + "\n")
         f_log.write(str6 + "\n")
         f_log.write("\n")
+    model.train()
 
     return d_l, f_l, e_l, mel_l, mel_p_l
 
@@ -162,5 +180,4 @@ if __name__ == "__main__":
         os.makedirs(hp.log_path)
     if not os.path.exists(hp.eval_path):
         os.makedirs(hp.eval_path)
-    
     evaluate(model, args.step, vocoder)

@@ -1,10 +1,9 @@
 import os
 ### kss ###
-dataset = "kss"
+dataset = "kss_v_1.4"
 data_path = os.path.join("/home/minsu/dataset/", dataset)
-meta_name = "transcript.v.1.3.txt"
+meta_name = "transcript.v.1.4.txt"	# "transcript.v.1.4.txt" or "transcript.v.1.3.txt" 
 textgrid_name = "TextGrid.zip"
-
 
 # Text
 text_cleaners = ['korean_cleaners']
@@ -19,8 +18,8 @@ win_length = 1024
 ### kss ###
 max_wav_value = 32768.0
 n_mel_channels = 80
-mel_fmin = 20
-mel_fmax = 7800
+mel_fmin = 0
+mel_fmax = 8000
 
 # FastSpeech 2
 encoder_layer = 4
@@ -44,16 +43,16 @@ max_seq_len = 1000
 # Quantization for F0 and energy
 ### kss ###
 f0_min = 71.0
-f0_max = 768.2
+f0_max = 792.8
 energy_min = 0.0
 energy_max = 283.72
-n_bins = 256
+#n_bins = 256
 
 
 # Checkpoints and synthesis path
 preprocessed_path = os.path.join("./preprocessed/", dataset)
 checkpoint_path = os.path.join("./ckpt/", dataset)
-synth_path = os.path.join("./synth/", dataset)
+#synth_path = os.path.join("./synth/", dataset)
 eval_path = os.path.join("./eval/", dataset)
 log_path = os.path.join("./log/", dataset)
 test_path = "./results"
@@ -82,7 +81,7 @@ log_offset = 1.
 # Save, log and synthesis
 save_step = 10000
 #save_step=1000
-synth_step = 1000
+#synth_step = 1000
 eval_step = 1000
 eval_size = 256
 log_step = 1000

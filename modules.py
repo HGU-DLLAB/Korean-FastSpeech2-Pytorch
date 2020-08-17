@@ -25,12 +25,11 @@ class VarianceAdaptor(nn.Module):
         self.length_regulator = LengthRegulator()
         self.pitch_predictor = VariancePredictor()
         self.energy_predictor = VariancePredictor()
-        
-        self.pitch_bins = nn.Parameter(torch.exp(torch.linspace(np.log(hp.f0_min), np.log(hp.f0_max), hp.n_bins-1)))
-        self.energy_bins = nn.Parameter(torch.linspace(hp.energy_min, hp.energy_max, hp.n_bins-1))
-        self.pitch_embedding = nn.Embedding(hp.n_bins, hp.encoder_hidden)
-        self.energy_embedding = nn.Embedding(hp.n_bins, hp.encoder_hidden)
-    
+
+        self.energy_embedding_producer = Conv(1, hp.encoder_hidden, kernel_size=9, bias=False, padding=4)    
+        self.pitch_embedding_producer = Conv(1, hp.encoder_hidden, kernel_size=9, bias=False, padding=4)
+
+
     def forward(self, x, src_mask, mel_mask=None, duration_target=None, pitch_target=None, energy_target=None, max_len=None):
         log_duration_prediction = self.duration_predictor(x, src_mask)
         
@@ -42,16 +41,10 @@ class VarianceAdaptor(nn.Module):
             mel_mask = utils.get_mask_from_lengths(mel_len)
         
         pitch_prediction = self.pitch_predictor(x, mel_mask)
-        if pitch_target is not None:
-            pitch_embedding = self.pitch_embedding(torch.bucketize(pitch_target, self.pitch_bins))
-        else:
-            pitch_embedding = self.pitch_embedding(torch.bucketize(pitch_prediction, self.pitch_bins))
+        pitch_embedding = self.pitch_embedding_producer(pitch_prediction.unsqueeze(2))
         
         energy_prediction = self.energy_predictor(x, mel_mask)
-        if energy_target is not None:
-            energy_embedding = self.energy_embedding(torch.bucketize(energy_target, self.energy_bins))
-        else:
-            energy_embedding = self.energy_embedding(torch.bucketize(energy_prediction, self.energy_bins))
+        energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))
         
         x = x + pitch_embedding + energy_embedding
         

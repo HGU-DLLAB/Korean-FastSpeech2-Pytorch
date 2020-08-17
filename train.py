@@ -4,6 +4,9 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import os
 
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
+
 import numpy as np
 import argparse
 import time
@@ -53,13 +56,27 @@ def main(args):
         if not os.path.exists(checkpoint_path):
             os.makedirs(checkpoint_path)
 
+    # read params
+    mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
+    mean_f0, std_f0 = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "f0_stat.npy")), dtype=torch.float).to(device)
+    mean_energy, std_energy = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "energy_stat.npy")), dtype=torch.float).to(device)
+
+    mean_mel, std_mel = mean_mel.reshape(1, -1), std_mel.reshape(1, -1)
+    mean_f0, std_f0 = mean_f0.reshape(1, -1), std_f0.reshape(1, -1)
+    mean_energy, std_energy = mean_energy.reshape(1, -1), std_energy.reshape(1, -1)
+
+
     # Load vocoder
     if hp.vocoder == 'melgan':
         melgan = utils.get_melgan()
         melgan.to(device)
+        vocoder=melgan
     elif hp.vocoder == 'waveglow':
         waveglow = utils.get_waveglow()
         waveglow.to(device)
+        vocoder=waveglow
+    else:
+        vocoder = None
 
     # Init logger
     log_path = hp.log_path
@@ -69,11 +86,6 @@ def main(args):
         os.makedirs(os.path.join(log_path, 'validation'))
     train_logger = SummaryWriter(os.path.join(log_path, 'train'))
     val_logger = SummaryWriter(os.path.join(log_path, 'validation'))
-
-    # Init synthesis directory
-    synth_path = hp.synth_path
-    if not os.path.exists(synth_path):
-        os.makedirs(synth_path)
 
     # Define Some Information
     Time = np.array([])
@@ -166,50 +178,22 @@ def main(args):
                         f_log.write(str3 + "\n")
                         f_log.write("\n")
 
-                    train_logger.add_scalar('Loss/total_loss', t_l, current_step)
-                    train_logger.add_scalar('Loss/mel_loss', m_l, current_step)
-                    train_logger.add_scalar('Loss/mel_postnet_loss', m_p_l, current_step)
-                    train_logger.add_scalar('Loss/duration_loss', d_l, current_step)
-                    train_logger.add_scalar('Loss/F0_loss', f_l, current_step)
-                    train_logger.add_scalar('Loss/energy_loss', e_l, current_step)
+                train_logger.add_scalar('Loss/total_loss', t_l, current_step)
+                train_logger.add_scalar('Loss/mel_loss', m_l, current_step)
+                train_logger.add_scalar('Loss/mel_postnet_loss', m_p_l, current_step)
+                train_logger.add_scalar('Loss/duration_loss', d_l, current_step)
+                train_logger.add_scalar('Loss/F0_loss', f_l, current_step)
+                train_logger.add_scalar('Loss/energy_loss', e_l, current_step)
                 
                 if current_step % hp.save_step == 0:
                     torch.save({'model': model.state_dict(), 'optimizer': optimizer.state_dict(
                     )}, os.path.join(checkpoint_path, 'checkpoint_{}.pth.tar'.format(current_step)))
                     print("save model at step {} ...".format(current_step))
 
-                if current_step % hp.synth_step == 0:
-                    length = mel_len[0].item()
-                    mel_target_torch = mel_target[0, :length].detach().unsqueeze(0).transpose(1, 2)
-                    mel_target = mel_target[0, :length].detach().cpu().transpose(0, 1)
-                    mel_torch = mel_output[0, :length].detach().unsqueeze(0).transpose(1, 2)
-                    mel = mel_output[0, :length].detach().cpu().transpose(0, 1)
-                    mel_postnet_torch = mel_postnet_output[0, :length].detach().unsqueeze(0).transpose(1, 2)
-                    mel_postnet = mel_postnet_output[0, :length].detach().cpu().transpose(0, 1)
-                    Audio.tools.inv_mel_spec(mel, os.path.join(synth_path, "step_{}_griffin_lim.wav".format(current_step)))
-                    Audio.tools.inv_mel_spec(mel_postnet, os.path.join(synth_path, "step_{}_postnet_griffin_lim.wav".format(current_step)))
-                    
-                    if hp.vocoder == 'melgan':
-                        utils.melgan_infer(mel_torch, melgan, os.path.join(hp.synth_path, 'step_{}_{}.wav'.format(current_step, hp.vocoder)))
-                        utils.melgan_infer(mel_postnet_torch, melgan, os.path.join(hp.synth_path, 'step_{}_postnet_{}.wav'.format(current_step, hp.vocoder)))
-                        utils.melgan_infer(mel_target_torch, melgan, os.path.join(hp.synth_path, 'step_{}_ground-truth_{}.wav'.format(current_step, hp.vocoder)))
-                    elif hp.vocoder == 'waveglow':
-                        utils.waveglow_infer(mel_torch, waveglow, os.path.join(hp.synth_path, 'step_{}_{}.wav'.format(current_step, hp.vocoder)))
-                        utils.waveglow_infer(mel_postnet_torch, waveglow, os.path.join(hp.synth_path, 'step_{}_postnet_{}.wav'.format(current_step, hp.vocoder)))
-                        utils.waveglow_infer(mel_target_torch, waveglow, os.path.join(hp.synth_path, 'step_{}_ground-truth_{}.wav'.format(current_step, hp.vocoder)))
-                    
-                    f0 = f0[0, :length].detach().cpu().numpy()
-                    energy = energy[0, :length].detach().cpu().numpy()
-                    f0_output = f0_output[0, :length].detach().cpu().numpy()
-                    energy_output = energy_output[0, :length].detach().cpu().numpy()
-                    
-                    utils.plot_data([(mel_postnet.numpy(), f0_output, energy_output), (mel_target.numpy(), f0, energy)], 
-                        ['Synthetized Spectrogram', 'Ground-Truth Spectrogram'], filename=os.path.join(synth_path, 'step_{}.png'.format(current_step)))
-                
                 if current_step % hp.eval_step == 0:
                     model.eval()
                     with torch.no_grad():
-                        d_l, f_l, e_l, m_l, m_p_l = evaluate(model, current_step)
+                        d_l, f_l, e_l, m_l, m_p_l = evaluate(model, current_step, vocoder)
                         t_l = d_l + f_l + e_l + m_l + m_p_l
                         
                         val_logger.add_scalar('Loss/total_loss', t_l, current_step)

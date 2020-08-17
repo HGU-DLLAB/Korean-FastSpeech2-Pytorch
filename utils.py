@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 from scipy.io import wavfile
+#from waveglow import denoiser
 import os
 
 import text
@@ -114,11 +115,15 @@ def get_waveglow():
         if 'Conv' in str(type(m)):
             setattr(m, 'padding_mode', 'zeros')
 
-    return waveglow
+    #for k in waveglow.convinv:
+    #    k.float()
+    #waveglow_denoiser = denoiser.Denoiser(waveglow)
+
+    return waveglow#, waveglow_denoiser
 
 def waveglow_infer(mel, waveglow, path):
     with torch.no_grad():
-        wav = waveglow.infer(mel, sigma=1.0) * hp.max_wav_value
+        wav = waveglow.infer(mel, sigma=1.0)* hp.max_wav_value
         wav = wav.squeeze().cpu().numpy()
     wav = wav.astype('int16')
     wavfile.write(path, hp.sampling_rate, wav)
@@ -185,3 +190,48 @@ def pad(input_ele, mel_max_length=None):
         out_list.append(one_batch_padded)
     out_padded = torch.stack(out_list)
     return out_padded
+
+
+# from dathudeptrai's FastSpeech2 implementation
+def standard_norm(x, mean, std, is_mel=False):
+
+    if not is_mel:
+        x = remove_outlier(x)
+
+    zero_idxs = np.where(x == 0.0)[0]
+    x = (x - mean) / std
+    x[zero_idxs] = 0.0
+    return x
+
+    return (x - mean) / std
+
+def de_norm(x, mean, std):
+    zero_idxs = torch.where(x == 0.0)[0]
+    x = mean + std * x
+    x[zero_idxs] = 0.0
+    return x
+
+
+def _is_outlier(x, p25, p75):
+    """Check if value is an outlier."""
+    lower = p25 - 1.5 * (p75 - p25)
+    upper = p75 + 1.5 * (p75 - p25)
+
+    return np.logical_or(x <= lower, x >= upper)
+
+
+def remove_outlier(x):
+    """Remove outlier from x."""
+    p25 = np.percentile(x, 25)
+    p75 = np.percentile(x, 75)
+
+    indices_of_outliers = []
+    for ind, value in enumerate(x):
+        if _is_outlier(value, p25, p75):
+            indices_of_outliers.append(ind)
+
+    x[indices_of_outliers] = 0.0
+
+    # replace by mean f0.
+    x[indices_of_outliers] = np.max(x)
+    return x
