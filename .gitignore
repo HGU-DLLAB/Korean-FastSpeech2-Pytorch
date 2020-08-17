@@ -132,7 +132,7 @@ log/
 ckpt/
 data/korean_dataset
 data/kss_dataset
-synth/
 results/
 preprocessed/
 text/for_testing
+eval/
