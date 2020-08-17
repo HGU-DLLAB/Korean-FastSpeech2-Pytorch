@@ -71,12 +71,9 @@ def synthesize(model, waveglow, melgan, text, sentence, prefix=''):
     f0_output = utils.de_norm(f0_output, mean_f0, std_f0).squeeze().detach().cpu().numpy()
     energy_output = utils.de_norm(energy_output, mean_energy, std_energy).squeeze().detach().cpu().numpy()
 
-    print(f0_output)
-
     if not os.path.exists(hp.test_path):
         os.makedirs(hp.test_path)
 
-    print(mel_postnet_torch[0].shape)
     Audio.tools.inv_mel_spec(mel_postnet_torch[0], os.path.join(hp.test_path, '{}_griffin_lim_{}.wav'.format(prefix, sentence)))
     if waveglow is not None:
         utils.waveglow_infer(mel_postnet_torch, waveglow, os.path.join(hp.test_path, '{}_{}_{}.wav'.format(prefix, hp.vocoder, sentence)))
