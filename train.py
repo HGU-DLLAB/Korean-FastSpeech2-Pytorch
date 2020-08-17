@@ -6,10 +6,6 @@ import os
 import numpy as np
 import argparse
 import time
-
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
-os.environ["CUDA_VISIBLE_DEVICES"]="6,7"
-
 from fastspeech2 import FastSpeech2
 from loss import FastSpeech2Loss
 from dataset import Dataset
