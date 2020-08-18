@@ -10,7 +10,7 @@
 본 프로젝트에서는 아래와 같은 contribution을 제공합니다.
 * kss dataset에 대해 동작하게 만든 소스코드
 * Montreal Forced Aligner로부터 추출한 kss dataset의 text-utterance duration 정보 (TextGrid)
-* kss dataset에 대해 학습한 pretrained model (제공 예정)
+* kss dataset에 대해 학습한 pretrained model
     
 **FastSpeech2가 생성한 오디오 sample은 [여기](https://soundcloud.com/7vwcti7og4fp/sets/korean-fastspeech2-audio-samples)에서 들으실 수 있습니다.**
 
@@ -62,12 +62,12 @@ data 전처리를 위해 위의 커맨드를 입력해 주세요. 전처리 된 
 ```
 python train.py
 ```
-학습된 모델은 ``ckpt/``에 저장되고 tensorboard log는 ``log/``에 저장됩니다. 학습시 evaluate 과정에서 생성된 음성은 ``synth/`` 폴더에 저장됩니다.
+학습된 모델은 ``ckpt/``에 저장되고 tensorboard log는 ``log/``에 저장됩니다. 학습시 evaluate 과정에서 생성된 음성은 ``eval/`` 폴더에 저장됩니다.
 
 # Synthesis
 학습된 파라미터를 기반으로 음성을 생성하는 명령어는 다음과 같습니다. 
 ```
-python synthesis.py --step 300000
+python synthesis.py --step 350000
 ```
 합성된 음성은  ```results/``` directory에서 확인하실 수 있습니다.
 
@@ -82,7 +82,6 @@ pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1
 tensorboard --logdir log/hp.dataset/
 ```
 tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러므로 위의 커멘드를 이용하여 tensorboard를 실행해 학습 상황을 모니터링 하실 수 있습니다.
-
 
 
 # Issues and TODOs

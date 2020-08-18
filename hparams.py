@@ -52,7 +52,6 @@ checkpoint_path = os.path.join("./ckpt/", dataset)
 eval_path = os.path.join("./eval/", dataset)
 log_path = os.path.join("./log/", dataset)
 test_path = "./results"
-waveglow_path = "./waveglow/pretrained_model/waveglow_256channels.pt"
 
 
 # Optimizer
