@@ -72,8 +72,8 @@ python synthesis.py --step 300000
 합성된 음성은  ```results/``` directory에서 확인하실 수 있습니다.
 
 # Pretrained model
-사전학습된 모델은 합성 음성의 기계음 이슈를 해결한 후 공개할 예정입니다.
-
+pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1T4w7c7RCBXs8jCgrjozD2kSgKhKXd1u6/view?usp=sharing)해 주세요.
+그 후,  ```hparams.py```에 있는 ```dataset``` 변수에 기록된 경로에 위치시켜주시면 사전학습된 모델을 사용 가능합니다.
 
 # Tensorboard
 ![](./assets/tensorboard.png)
@@ -86,9 +86,10 @@ tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러
 
 
 # Issues and TODOs
-- pitch, energy loss가 total loss의 대부분을 차지하여 개선 중에 있음.
-- 생성된 음성에서의 기계음 문제
-- pretrained model 업로드
+- [완료] pitch, energy loss가 total loss의 대부분을 차지하여 개선 중에 있음.
+- [완료] 생성된 음성에서의 기계음 문제
+- [완료] pretrained model 업로드
+- mel, f0, energy overfitting 문제
 - [other issues](https://github.com/ming024/FastSpeech2) from ming024's implementation
 
 
