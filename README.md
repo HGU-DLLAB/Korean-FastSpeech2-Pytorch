@@ -1,7 +1,6 @@
 # Korean FastSpeech 2 - Pytorch Implementation (WIP)
 
 ![](./assets/model.png)
-
 # Introduction
 
 최근 딥러닝 기반 음성합성 기술이 발전하며, 자기회귀적 모델의 느린 음성 합성 속도를 개선하기 위해 비자기회귀적 음성합성 모델이 제안되었습니다. FastSpeech2는 비자기회귀적 음성합성 모델들 중 하나로, Montreal Forced Aligner(M. McAuliffe et.al., 2017)에서 phoneme(text)-utterance alignment를 추출한 duration 정보를 학습하고, 이를 바탕으로 phoneme별 duration을 예측합니다. 예측된 duration을 바탕으로 phoneme-utterance alignment가 결정되고 이를 바탕으로 phoneme에 대응되는 음성이 생성됩니다. 그러므로, FastSpeech2를 학습시키기 위해서는 MFA에서 학습된 phoneme-utterance alignment 정보가 필요합니다.
@@ -17,7 +16,7 @@
 
 # Install Dependencies
 
-먼저, [ffmpeg](https://ffmpeg.org/)와 [g2pk](https://github.com/Kyubyong/g2pK)를 설치합니다.
+먼저 python=3.7, [pytorch](https://pytorch.org/)=1.6, [ffmpeg](https://ffmpeg.org/)와 [g2pk](https://github.com/Kyubyong/g2pK)를 설치합니다.
 ```
 # ffmpeg install
 sudo apt-get install ffmpeg
@@ -31,10 +30,8 @@ pip install g2pk
 pip install -r requirements.txt
 ```
 
-마지막으로, pytorch version 1.6 (nightly version)을 설치합니다. 
-```
-pip install --pre torch==1.6.0.dev20200428 -f https://download.pytorch.org/whl/nightly/cu102/torch_nightly.html
-```
+**[WARNING] anaconda 가상환경을 사용하시는 것을 권장드립니다.**
+
 
 # Preprocessing
 
@@ -58,10 +55,6 @@ FastSpeech2를 학습하기 위해서는 [Montreal Forced Aligner](https://montr
 python preprocess.py
 ```
 data 전처리를 위해 위의 커맨드를 입력해 주세요. 전처리 된 데이터는 프로젝트 폴더의 ``preprocessed/`` 폴더에 생성됩니다.
-    
-**(4) ``stat.txt``확인 후 ``hparams.py``를  update** 
-
-preprocessing 후에 ``hp.preprocessed_path/stat.txt`` 파일을 확인해 주세요. 그리고 ``hparams.py``의 f0_min, f0_max, energy_min, energy_max 변수를 업데이트해 주세요.
 
     
 # Train
@@ -83,10 +76,14 @@ python synthesis.py --step 300000
 
 
 # Tensorboard
+![](./assets/tensorboard.png)
+
 ```
 tensorboard --logdir log/hp.dataset/
 ```
 tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러므로 위의 커멘드를 이용하여 tensorboard를 실행해 학습 상황을 모니터링 하실 수 있습니다.
+
+
 
 # Issues and TODOs
 - pitch, energy loss가 total loss의 대부분을 차지하여 개선 중에 있음.
