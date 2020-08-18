@@ -76,12 +76,18 @@ pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1
 그 후,  ```hparams.py```에 있는 ```dataset``` 변수에 기록된 경로에 위치시켜주시면 사전학습된 모델을 사용 가능합니다.
 
 # Tensorboard
-![](./assets/tensorboard.png)
-
 ```
 tensorboard --logdir log/hp.dataset/
 ```
 tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러므로 위의 커멘드를 이용하여 tensorboard를 실행해 학습 상황을 모니터링 하실 수 있습니다.
+
+
+# Train and synthesis results
+- 학습 과정 시각화
+![](./assets/tensorboard.png)
+
+- 합성시 생성된 melspectrogram과 예측된 f0, energy values
+![](./assets/melspectrogram.png)
 
 
 # Issues and TODOs
