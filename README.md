@@ -12,7 +12,7 @@
 * Montreal Forced Aligner로부터 추출한 kss dataset의 text-utterance duration 정보 (TextGrid)
 * kss dataset에 대해 학습한 pretrained model
     
-**FastSpeech2가 생성한 오디오 sample은 [여기](https://soundcloud.com/7vwcti7og4fp/korean-fastspeech2-audio-samples)에서 들으실 수 있습니다.**
+**FastSpeech2가 생성한 오디오 sample은 [여기](https://soundcloud.com/7vwcti7og4fp/sets/korean-fastspeech2-audio-samples)에서 들으실 수 있습니다.**
 
 # Install Dependencies
 
