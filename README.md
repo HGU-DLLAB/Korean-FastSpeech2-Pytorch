@@ -82,6 +82,7 @@ tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러
 
 # Train and synthesis results
 - 합성된 음성 샘플
+
 **FastSpeech2가 생성한 오디오 sample은 [여기](https://soundcloud.com/7vwcti7og4fp/sets/korean-fastspeech2-audio-samples)에서 들으실 수 있습니다.**
 
 - 학습 과정 시각화
