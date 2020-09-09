@@ -71,7 +71,7 @@ python synthesis.py --step 350000
 
 # Pretrained model
 pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1T4w7c7RCBXs8jCgrjozD2kSgKhKXd1u6/view?usp=sharing)해 주세요.
-그 후,  ```hparams.py```에 있는 ```dataset``` 변수에 기록된 경로에 위치시켜주시면 사전학습된 모델을 사용 가능합니다.
+그 후,  ```hparams.py```에 있는 ```checkpoint_path``` 변수에 기록된 경로에 위치시켜주시면 사전학습된 모델을 사용 가능합니다.
 
 # Tensorboard
 ```
