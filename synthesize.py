@@ -1,14 +1,18 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import hparams as hp
 import os
+
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]=hp.synth_visible_devices
+
 import argparse
 import re
 from string import punctuation
 
 from fastspeech2 import FastSpeech2
 from text import text_to_sequence, sequence_to_text
-import hparams as hp
 import utils
 import audio as Audio
 
@@ -97,7 +101,6 @@ if __name__ == "__main__":
         melgan.to(device)
     elif hp.vocoder == 'waveglow':
         waveglow = utils.get_waveglow()
-        waveglow.to(device)
     
     #kss
     eval_sentence=['그는 괜찮은 척하려고 애쓰는 것 같았다','그녀의 사랑을 얻기 위해 애썼지만 헛수고였다','용돈을 아껴써라','그는 아내를 많이 아낀다','요즘 공부가 안돼요','한 여자가 내 옆에 앉았다']

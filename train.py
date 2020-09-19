@@ -2,7 +2,12 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import hparams as hp
 import os
+
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]=hp.train_visible_devices
+
 import numpy as np
 import argparse
 import time
@@ -11,7 +16,6 @@ from loss import FastSpeech2Loss
 from dataset import Dataset
 from optimizer import ScheduledOptim
 from evaluate import evaluate
-import hparams as hp
 import utils
 import audio as Audio
 
@@ -68,7 +72,6 @@ def main(args):
         vocoder=melgan
     elif hp.vocoder == 'waveglow':
         waveglow = utils.get_waveglow()
-        waveglow.to(device)
         vocoder=waveglow
     else:
         vocoder = None

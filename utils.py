@@ -3,17 +3,22 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import matplotlib
-import matplotlib
+
 matplotlib.use("Agg")
+
 from matplotlib import pyplot as plt
 from scipy.io import wavfile
-#from waveglow import denoiser
+from denoiser import Denoiser
+import hparams as hp
 import os
 
+#os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+#os.environ["CUDA_VISIBLE_DEVICES"]=hp.synth_visible_devices
+
 import text
-import hparams as hp
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def get_alignment(tier):
     sil_phones = ['sil', 'sp', 'spn']
@@ -107,23 +112,33 @@ def get_mask_from_lengths(lengths, max_len=None):
 
     return mask
 
+
+def get_denoiser(vocoder_model):
+    return Denoiser(vocoder_model, device=device)
+
 def get_waveglow():
     waveglow = torch.hub.load('nvidia/DeepLearningExamples:torchhub', 'nvidia_waveglow')
     waveglow = waveglow.remove_weightnorm(waveglow)
-    waveglow.eval()
+    waveglow.to(device).eval()
     for m in waveglow.modules():
         if 'Conv' in str(type(m)):
             setattr(m, 'padding_mode', 'zeros')
 
-    #for k in waveglow.convinv:
-    #    k.float()
-    #waveglow_denoiser = denoiser.Denoiser(waveglow)
+    for k in waveglow.convinv:
+        k.float()
 
-    return waveglow#, waveglow_denoiser
+    denoiser = get_denoiser(waveglow)
+    denoiser.to(device).eval()
 
-def waveglow_infer(mel, waveglow, path):
+    return waveglow, denoiser
+
+def waveglow_infer(mel, vocoder, path):
+
+    waveglow, denoiser = vocoder
+
     with torch.no_grad():
         wav = waveglow.infer(mel, sigma=1.0)* hp.max_wav_value
+        wav = denoiser(wav, strength=0.01)[:, 0]
         wav = wav.squeeze().cpu().numpy()
     wav = wav.astype('int16')
     wavfile.write(path, hp.sampling_rate, wav)

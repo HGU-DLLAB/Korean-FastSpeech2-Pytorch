@@ -1,9 +1,13 @@
 import os
 ### kss ###
-dataset = "kss"
+dataset = "kss_v_1.4"
 data_path = os.path.join("/home/minsu/dataset/", dataset)
 meta_name = "transcript.v.1.4.txt"	# "transcript.v.1.4.txt" or "transcript.v.1.3.txt" 
 textgrid_name = "TextGrid.zip"
+
+### set GPU number ###
+train_visible_devices = "6,7"
+synth_visible_devices = "1"
 
 # Text
 text_cleaners = ['korean_cleaners']
@@ -75,7 +79,8 @@ log_offset = 1.
 
 # Save, log and synthesis
 save_step = 10000
-eval_step = 1000
+eval_step = 2
 eval_size = 256
-log_step = 1000
+log_step = 2
 clear_Time = 20
+
