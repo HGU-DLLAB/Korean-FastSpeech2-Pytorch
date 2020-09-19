@@ -79,8 +79,8 @@ log_offset = 1.
 
 # Save, log and synthesis
 save_step = 10000
-eval_step = 2
+eval_step = 1000
 eval_size = 256
-log_step = 2
+log_step = 1000
 clear_Time = 20
 
