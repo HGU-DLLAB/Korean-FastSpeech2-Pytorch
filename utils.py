@@ -11,10 +11,6 @@ from scipy.io import wavfile
 from denoiser import Denoiser
 import hparams as hp
 import os
-
-#os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-#os.environ["CUDA_VISIBLE_DEVICES"]=hp.synth_visible_devices
-
 import text
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
