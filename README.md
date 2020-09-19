@@ -1,4 +1,4 @@
-# Korean FastSpeech 2 - Pytorch Implementation (WIP)
+# Korean FastSpeech 2 - Pytorch Implementation
 
 ![](./assets/model.png)
 # Introduction
@@ -96,7 +96,7 @@ tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러
 - [완료] pitch, energy loss가 total loss의 대부분을 차지하여 개선 중에 있음.
 - [완료] 생성된 음성에서의 기계음 문제
 - [완료] pretrained model 업로드
-- mel, f0, energy overfitting 문제
+- [완료] vocoder의 기계음 및 noise 감소
 - [other issues](https://github.com/ming024/FastSpeech2) from ming024's implementation
 
 
