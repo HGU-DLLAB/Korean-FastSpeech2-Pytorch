@@ -1,3 +1,11 @@
+"""
+	[VocGAN] Generator
+
+		this source code is implemenation of the modified-VocGAN from rishikksh20
+		git repository: https://github.com/rishikksh20/VocGAN
+"""
+
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

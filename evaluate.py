@@ -9,8 +9,10 @@ import re
 
 from fastspeech2 import FastSpeech2
 from loss import FastSpeech2Loss
+
 from dataset import Dataset
 from text import text_to_sequence, sequence_to_text
+
 import hparams as hp
 import utils
 import audio as Audio
