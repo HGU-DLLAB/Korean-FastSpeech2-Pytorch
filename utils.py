@@ -8,7 +8,7 @@ matplotlib.use("Agg")
 
 from matplotlib import pyplot as plt
 from scipy.io import wavfile
-from denoiser import Denoiser
+from vocoder.vocgan_generator import Generator
 import hparams as hp
 import os
 import text
@@ -108,47 +108,32 @@ def get_mask_from_lengths(lengths, max_len=None):
 
     return mask
 
+def get_vocgan(ckpt_path, n_mel_channels=hp.n_mel_channels, generator_ratio = [4, 4, 2, 2, 2, 2], n_residual_layers=4, mult=256, out_channels=1):
 
-def get_denoiser(vocoder_model):
-    return Denoiser(vocoder_model, device=device)
+    checkpoint = torch.load(ckpt_path)
+    model = Generator(n_mel_channels, n_residual_layers,
+                        ratios=generator_ratio, mult=mult,
+                        out_band=out_channels)
 
-def get_waveglow():
-    waveglow = torch.hub.load('nvidia/DeepLearningExamples:torchhub', 'nvidia_waveglow')
-    waveglow = waveglow.remove_weightnorm(waveglow)
-    waveglow.to(device).eval()
-    for m in waveglow.modules():
-        if 'Conv' in str(type(m)):
-            setattr(m, 'padding_mode', 'zeros')
+    model.load_state_dict(checkpoint['model_g'])
+    model.to(device).eval()
 
-    for k in waveglow.convinv:
-        k.float()
+    return model
 
-    denoiser = get_denoiser(waveglow)
-    denoiser.to(device).eval()
-
-    return waveglow, denoiser
-
-def waveglow_infer(mel, vocoder, path):
-
-    waveglow, denoiser = vocoder
+def vocgan_infer(mel, vocoder, path):
+    model = vocoder
 
     with torch.no_grad():
-        wav = waveglow.infer(mel, sigma=1.0)* hp.max_wav_value
-        wav = denoiser(wav, strength=0.01)[:, 0]
-        wav = wav.squeeze().cpu().numpy()
-    wav = wav.astype('int16')
-    wavfile.write(path, hp.sampling_rate, wav)
+        if len(mel.shape) == 2:
+            mel = mel.unsqueeze(0)
 
-def melgan_infer(mel, melgan, path):
-    with torch.no_grad():
-        wav = melgan.inference(mel).cpu().numpy()
-    wav = wav.astype('int16')
-    wavfile.write(path, hp.sampling_rate, wav)
+        audio = model.infer(mel).squeeze()
+        audio = hp.max_wav_value * audio[:-(hp.hop_length*10)]
+        audio = audio.clamp(min=-hp.max_wav_value, max=hp.max_wav_value-1)
+        audio = audio.short().cpu().detach().numpy()
 
-def get_melgan():
-    melgan = torch.hub.load('seungwonpark/melgan', 'melgan')
-    melgan.eval()
-    return melgan
+        wavfile.write(path, hp.sampling_rate, audio)
+
 
 def pad_1D(inputs, PAD=0):
 
@@ -245,3 +230,16 @@ def remove_outlier(x):
     # replace by mean f0.
     x[indices_of_outliers] = np.max(x)
     return x
+
+def average_by_duration(x, durs):
+    mel_len = durs.sum()
+    durs_cum = np.cumsum(np.pad(durs, (1, 0)))
+
+    # calculate charactor f0/energy
+    x_char = np.zeros((durs.shape[0],), dtype=np.float32)
+    for idx, start, end in zip(range(mel_len), durs_cum[:-1], durs_cum[1:]):
+        values = x[start:end][np.where(x[start:end] != 0.0)[0]]
+        x_char[idx] = np.mean(values) if len(values) > 0 else 0.0  # np.mean([]) = nan.
+
+    return x_char.astype(np.float32)
+

@@ -12,6 +12,8 @@ import re
 from string import punctuation
 
 from fastspeech2 import FastSpeech2
+from vocoder import vocgan_generator
+
 from text import text_to_sequence, sequence_to_text
 import utils
 import audio as Audio
@@ -50,7 +52,7 @@ def get_FastSpeech2(num):
     model.eval()
     return model
 
-def synthesize(model, waveglow, melgan, text, sentence, prefix=''):
+def synthesize(model, vocoder, text, sentence, prefix=''):
     sentence = sentence[:10] # long filename will result in OS Error
 
     mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
@@ -79,10 +81,10 @@ def synthesize(model, waveglow, melgan, text, sentence, prefix=''):
         os.makedirs(hp.test_path)
 
     Audio.tools.inv_mel_spec(mel_postnet_torch[0], os.path.join(hp.test_path, '{}_griffin_lim_{}.wav'.format(prefix, sentence)))
-    if waveglow is not None:
-        utils.waveglow_infer(mel_postnet_torch, waveglow, os.path.join(hp.test_path, '{}_{}_{}.wav'.format(prefix, hp.vocoder, sentence)))
-    if melgan is not None:
-        utils.melgan_infer(mel_postnet_torch, melgan, os.path.join(hp.test_path, '{}_{}_{}.wav'.format(prefix, hp.vocoder, sentence)))
+
+    if vocoder is not None:
+        if hp.vocoder.lower() == "vocgan":
+            utils.vocgan_infer(mel_postnet_torch, vocoder, path=os.path.join(hp.test_path, '{}_{}_{}.wav'.format(prefix, hp.vocoder, sentence)))   
     
     utils.plot_data([(mel_postnet_torch[0].detach().cpu().numpy(), f0_output, energy_output)], ['Synthesized Spectrogram'], filename=os.path.join(hp.test_path, '{}_{}.png'.format(prefix, sentence)))
 
@@ -95,13 +97,11 @@ if __name__ == "__main__":
 
     
     model = get_FastSpeech2(args.step).to(device)
-    melgan = waveglow = None
-    if hp.vocoder == 'melgan':
-        melgan = utils.get_melgan()
-        melgan.to(device)
-    elif hp.vocoder == 'waveglow':
-        waveglow = utils.get_waveglow()
-    
+    if hp.vocoder == 'vocgan':
+        vocoder = utils.get_vocgan(ckpt_path=hp.vocoder_pretrained_model_path)
+    else:
+        vocoder = None   
+ 
     #kss
     eval_sentence=['그는 괜찮은 척하려고 애쓰는 것 같았다','그녀의 사랑을 얻기 위해 애썼지만 헛수고였다','용돈을 아껴써라','그는 아내를 많이 아낀다','요즘 공부가 안돼요','한 여자가 내 옆에 앉았다']
     train_sentence=['가까운 시일 내에 한번, 댁으로 찾아가겠습니다','우리의 승리는 기적에 가까웠다','아이들의 얼굴에는 행복한 미소가 가득했다','헬륨은 공기보다 가볍다','이것은 간단한 문제가 아니다']
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     if mode != '4':
         for s in sentence:
             text = kor_preprocess(s)
-            synthesize(model, waveglow, melgan, text, s, prefix='step_{}'.format(args.step))
+            synthesize(model, vocoder, text, s, prefix='step_{}'.format(args.step))
     else:
         text = kor_preprocess(sentence)
-        synthesize(model, waveglow, melgan, text, sentence, prefix='step_{}'.format(args.step))
+        synthesize(model, vocoder, text, sentence, prefix='step_{}'.format(args.step))

@@ -1,5 +1,5 @@
 import os
-from data import korean
+from data import kss
 import hparams as hp
 
 def write_metadata(train, val, out_dir):
@@ -55,7 +55,7 @@ def main():
                 os.system("mv {} {}".format(os.path.join(in_dir, "wavs"), os.path.join(in_dir, "wavs_bak")))
                 os.makedirs(os.path.join(in_dir, "wavs"))
 
-        train, val = korean.build_from_path(in_dir, out_dir, meta)
+        train, val = kss.build_from_path(in_dir, out_dir, meta)
 
     write_metadata(train, val, out_dir)
     

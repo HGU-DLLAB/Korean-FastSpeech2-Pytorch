@@ -10,7 +10,8 @@
 본 프로젝트에서는 아래와 같은 contribution을 제공합니다.
 * kss dataset에 대해 동작하게 만든 소스코드
 * Montreal Forced Aligner로부터 추출한 kss dataset의 text-utterance duration 정보 (TextGrid)
-* kss dataset에 대해 학습한 pretrained model
+* kss dataset에 대해 학습한 FastSpeech2(Text-to-melspectrogram network) pretrained model
+* kss dataset에 대해 학습한 [VocGAN](https://arxiv.org/pdf/2007.15256.pdf)(Neural vocoder)의 pretrained model
 
 # Install Dependencies
 
@@ -47,7 +48,6 @@ FastSpeech2를 학습하기 위해서는 [Montreal Forced Aligner](https://montr
 
 ***KSS dataset에 적용된 License로 인해 kss dataset에서 추출된 TextGrid를 상업적으로 사용하는 것을 금합니다.**
 
-
 **(3) 데이터 전처리**
 ```
 python preprocess.py
@@ -56,7 +56,9 @@ data 전처리를 위해 위의 커맨드를 입력해 주세요. 전처리 된 
 
     
 # Train
-모델 학습을 진행하기 위한 커맨드는 다음과 같습니다.
+모델 학습 전에, kss dataset에 대해 사전학습된 VocGAN(neural vocoder)을 [다운로드](https://drive.google.com/file/d/1GxaLlTrEhq0aXFvd_X1f4b-ev7-FH8RB/view?usp=sharing) 하여 ``vocoder/pretrained_models/`` 경로에 위치시킵니다.
+
+다음으로, 아래의 커맨드를 입력하여 모델 학습을 수행합니다.
 ```
 python train.py
 ```
@@ -69,8 +71,8 @@ python synthesis.py --step 350000
 ```
 합성된 음성은  ```results/``` directory에서 확인하실 수 있습니다.
 
-# Pretrained model
-pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1T4w7c7RCBXs8jCgrjozD2kSgKhKXd1u6/view?usp=sharing)해 주세요.
+# Pretrained model (재학습 후 업데이트 예정)
+pretrained model(checkpoint)을 [다운로드]()해 주세요.
 그 후,  ```hparams.py```에 있는 ```checkpoint_path``` 변수에 기록된 경로에 위치시켜주시면 사전학습된 모델을 사용 가능합니다.
 
 # Tensorboard
@@ -108,5 +110,4 @@ We specially thank to ming024 for providing FastSpeech2 pytorch-implentation. Th
 - [FastSpeech 2: Fast and High-Quality End-to-End Text to Speech](https://arxiv.org/abs/2006.04558), Y. Ren, *et al*.
 - [FastSpeech: Fast, Robust and Controllable Text to Speech](https://arxiv.org/abs/1905.09263), Y. Ren, *et al*.
 - [ming024's FastSpeech2 impelmentation](https://github.com/ming024/FastSpeech2)
-- [NVIDIA's WaveGlow implementation](https://github.com/NVIDIA/waveglow)
-- [seungwonpark's MelGAN implementation](https://github.com/seungwonpark/melgan)
+- [rishikksh20's VocGANimplementation](https://github.com/rishikksh20/VocGAN)

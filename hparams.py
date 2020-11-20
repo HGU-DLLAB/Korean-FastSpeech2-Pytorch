@@ -1,12 +1,12 @@
 import os
 ### kss ###
-dataset = "kss_v_1.4"
+dataset = "kss"
 data_path = os.path.join("/home/minsu/dataset/", dataset)
 meta_name = "transcript.v.1.4.txt"	# "transcript.v.1.4.txt" or "transcript.v.1.3.txt" 
 textgrid_name = "TextGrid.zip"
 
 ### set GPU number ###
-train_visible_devices = "6,7"
+train_visible_devices = "0,1"
 synth_visible_devices = "1"
 
 # Text
@@ -29,7 +29,6 @@ f0_min = 71.0
 f0_max = 792.8
 energy_min = 0.0
 energy_max = 283.72
-
 
 
 # FastSpeech 2
@@ -71,7 +70,9 @@ weight_decay = 0.
 
 
 # Vocoder
-vocoder = 'waveglow' # 'waveglow' or 'melgan'
+vocoder = 'vocgan'
+vocoder_pretrained_model_name = "vocgan_kss_pretrained_model_epoch_4500.pt"
+vocoder_pretrained_model_path = os.path.join("./vocoder/pretrained_models/", vocoder_pretrained_model_name)
 
 # Log-scaled duration
 log_offset = 1.

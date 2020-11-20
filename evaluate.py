@@ -6,7 +6,6 @@ import numpy as np
 import os
 import argparse
 import re
-from g2p_en import G2p
 
 from fastspeech2 import FastSpeech2
 from loss import FastSpeech2Loss
@@ -99,14 +98,11 @@ def evaluate(model, step, vocoder=None):
                         mel_target_ = utils.de_norm(mel_target_, mean_mel, std_mel).cpu().transpose(0, 1).detach()
                         mel_postnet_torch = utils.de_norm(mel_postnet_torch, mean_mel, std_mel).transpose(1, 2).detach()
                         mel_postnet = utils.de_norm(mel_postnet, mean_mel, std_mel).cpu().transpose(0, 1).detach()
-                        if hp.vocoder == 'melgan':
-                            utils.melgan_infer(mel_target_torch, vocoder, os.path.join(hp.eval_path, 'eval_ground-truth_{}_{}.wav'.format(basename, hp.vocoder)))
-                            utils.melgan_infer(mel_postnet_torch, vocoder, os.path.join(hp.eval_path, 'eval_{}_{}.wav'.format(basename, hp.vocoder)))
-                        elif hp.vocoder == 'waveglow':
-                            utils.waveglow_infer(mel_target_torch, vocoder, os.path.join(hp.eval_path, 'eval_ground-truth_{}_{}.wav'.format(basename, hp.vocoder)))
-                            utils.waveglow_infer(mel_postnet_torch, vocoder, os.path.join(hp.eval_path, 'eval_{}_{}.wav'.format(basename, hp.vocoder)))
 
-                        np.save(os.path.join(hp.eval_path, 'eval_{}_mel.npy'.format(basename)), mel_postnet.numpy())
+                        if hp.vocoder == "vocgan":
+                            utils.vocgan_infer(mel_target_torch, vocoder, path=os.path.join(hp.eval_path, 'eval_groundtruth_{}_{}.wav'.format(basename, hp.vocoder)))   
+                            utils.vocgan_infer(mel_postnet_torch, vocoder, path=os.path.join(hp.eval_path, 'eval_{}_{}_{}.wav'.format(step, basename, hp.vocoder)))  
+                        np.save(os.path.join(hp.eval_path, 'eval_step_{}_{}_mel.npy'.format(step, basename)), mel_postnet.numpy())
                         
                         f0_ = f0[k, :gt_length]
                         energy_ = energy[k, :gt_length]
@@ -119,7 +115,7 @@ def evaluate(model, step, vocoder=None):
                         energy_output_ = utils.de_norm(energy_output_, mean_energy, std_energy).detach().cpu().numpy()
  
                         utils.plot_data([(mel_postnet.numpy(), f0_output_, energy_output_), (mel_target_.numpy(), f0_, energy_)], 
-                            ['Synthesized Spectrogram', 'Ground-Truth Spectrogram'], filename=os.path.join(hp.eval_path, 'eval_{}.png'.format(basename)))
+                            ['Synthesized Spectrogram', 'Ground-Truth Spectrogram'], filename=os.path.join(hp.eval_path, 'eval_step_{}_{}.png'.format(step, basename)))
                         idx += 1
                     print("done")
             current_step += 1            

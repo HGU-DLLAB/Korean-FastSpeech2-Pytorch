@@ -32,20 +32,20 @@ class VarianceAdaptor(nn.Module):
     def forward(self, x, src_mask, mel_mask=None, duration_target=None, pitch_target=None, energy_target=None, max_len=None):
         log_duration_prediction = self.duration_predictor(x, src_mask)
         
+        pitch_prediction = self.pitch_predictor(x, src_mask)
+        pitch_embedding = self.pitch_embedding_producer(pitch_prediction.unsqueeze(2))
+        
+        energy_prediction = self.energy_predictor(x, src_mask)
+        energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))
+
+        x = x + pitch_embedding + energy_embedding
+
         if duration_target is not None:
             x, mel_len = self.length_regulator(x, duration_target, max_len)
         else:
             duration_rounded = torch.clamp(torch.round(torch.exp(log_duration_prediction)-hp.log_offset), min=0)
             x, mel_len = self.length_regulator(x, duration_rounded, max_len)
             mel_mask = utils.get_mask_from_lengths(mel_len)
-        
-        pitch_prediction = self.pitch_predictor(x, mel_mask)
-        pitch_embedding = self.pitch_embedding_producer(pitch_prediction.unsqueeze(2))
-        
-        energy_prediction = self.energy_predictor(x, mel_mask)
-        energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))
-        
-        x = x + pitch_embedding + energy_embedding
         
         return x, log_duration_prediction, pitch_prediction, energy_prediction, mel_len, mel_mask
 

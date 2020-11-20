@@ -5,7 +5,7 @@ from scipy.io.wavfile import read
 import pyworld as pw
 import torch
 import audio as Audio
-from utils import get_alignment, standard_norm, remove_outlier
+from utils import get_alignment, standard_norm, remove_outlier, average_by_duration
 import hparams as hp
 from jamo import h2j
 import codecs
@@ -94,6 +94,9 @@ def process_utterance(in_dir, out_dir, basename, scalers):
     mel_spectrogram = mel_spectrogram.numpy().astype(np.float32)[:, :sum(duration)]
     energy = energy.numpy().astype(np.float32)[:sum(duration)]
 
+    f0, energy, duration = remove_outlier(f0), remove_outlier(energy), np.array(duration)
+    f0, energy = average_by_duration(f0, duration), average_by_duration(energy, duration)
+
     if mel_spectrogram.shape[1] >= hp.max_seq_len:
         return None
 
@@ -114,9 +117,6 @@ def process_utterance(in_dir, out_dir, basename, scalers):
     np.save(os.path.join(out_dir, 'mel', mel_filename), mel_spectrogram.T, allow_pickle=False)
    
     mel_scaler, f0_scaler, energy_scaler = scalers
-
-    energy = remove_outlier(energy)
-    f0 = remove_outlier(f0)
 
     mel_scaler.partial_fit(mel_spectrogram.T)
     f0_scaler.partial_fit(f0[f0!=0].reshape(-1, 1))

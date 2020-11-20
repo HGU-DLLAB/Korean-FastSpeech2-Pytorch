@@ -66,13 +66,9 @@ def main(args):
 
 
     # Load vocoder
-    if hp.vocoder == 'melgan':
-        melgan = utils.get_melgan()
-        melgan.to(device)
-        vocoder=melgan
-    elif hp.vocoder == 'waveglow':
-        waveglow = utils.get_waveglow()
-        vocoder=waveglow
+    if hp.vocoder == 'vocgan':
+        vocoder = utils.get_vocgan(ckpt_path = hp.vocoder_pretrained_model_path)
+        vocoder.to(device)
     else:
         vocoder = None
 
