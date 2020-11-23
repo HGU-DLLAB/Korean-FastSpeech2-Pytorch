@@ -173,22 +173,18 @@ class Generator(nn.Module):
 
         x = self.upsample_2(x)
         x = self.res_stack_2(x)  # [B, dim/2, T*16] -> torch.Size([3, 128, 160])
-        # out1 = self.sub_out_1(x)  # [B, 1, T*16] -> torch.Size([3, 1, 160])
 
         x = self.upsample_3(x)
         x = x + self.skip_upsample_1(mel)
         x = self.res_stack_3(x)  # [B, dim/4, T*32] -> torch.Size([3, 64, 320])
-        # out2 = self.sub_out_2(x)  # [B, 1, T*32] -> torch.Size([3, 1, 320])
 
         x = self.upsample_4(x)
         x = x + self.skip_upsample_2(mel)
         x = self.res_stack_4(x)  # [B, dim/8, T*64] -> torch.Size([3, 32, 640])
-        # out3 = self.sub_out_3(x)  # [B, 1, T*64] -> torch.Size([3, 1, 640])
 
         x = self.upsample_5(x)
         x = x + self.skip_upsample_3(mel)
         x = self.res_stack_5(x)  # [B, dim/16, T*128] -> torch.Size([3, 16, 1280])
-        # out4 = self.sub_out_4(x)  # [B, 1, T*128] -> torch.Size([3, 1, 1280])
 
         x = self.upsample_6(x)
         x = x + self.skip_upsample_4(mel)
@@ -196,7 +192,7 @@ class Generator(nn.Module):
 
         out = self.out(x)  # [B, 1, T*256] -> torch.Size([3, 1, 2560])
 
-        return out #out1, out2, out3, out4, out
+        return out 
 
     def eval(self, inference=False):
         super(Generator, self).eval()
@@ -204,14 +200,6 @@ class Generator(nn.Module):
         # don't remove weight norm while validation in training loop
         if inference:
             self.remove_weight_norm()
-
-    # def remove_weight_norm(self):
-    #     for idx, layer in enumerate(self.generator):
-    #         if len(layer.state_dict()) != 0:
-    #             try:
-    #                 nn.utils.remove_weight_norm(layer)
-    #             except:
-    #                 layer.remove_weight_norm()
 
     def remove_weight_norm(self):
         """Remove weight normalization module from all of the layers."""

@@ -94,7 +94,7 @@ def process_utterance(in_dir, out_dir, basename, scalers):
     mel_spectrogram = mel_spectrogram.numpy().astype(np.float32)[:, :sum(duration)]
     energy = energy.numpy().astype(np.float32)[:sum(duration)]
 
-    f0, energy, duration = remove_outlier(f0), remove_outlier(energy), np.array(duration)
+    f0, energy = remove_outlier(f0), remove_outlier(energy)
     f0, energy = average_by_duration(f0, duration), average_by_duration(energy, duration)
 
     if mel_spectrogram.shape[1] >= hp.max_seq_len:

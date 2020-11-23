@@ -67,12 +67,12 @@ python train.py
 # Synthesis
 학습된 파라미터를 기반으로 음성을 생성하는 명령어는 다음과 같습니다. 
 ```
-python synthesis.py --step 350000
+python synthesis.py --step 500000
 ```
 합성된 음성은  ```results/``` directory에서 확인하실 수 있습니다.
 
 # Pretrained model (재학습 후 업데이트 예정)
-pretrained model(checkpoint)을 [다운로드]()해 주세요.
+pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1iKslHiTfHasAddzyAlYT5eAaORYhPjFg/view?usp=sharing)해 주세요.
 그 후,  ```hparams.py```에 있는 ```checkpoint_path``` 변수에 기록된 경로에 위치시켜주시면 사전학습된 모델을 사용 가능합니다.
 
 # Tensorboard
@@ -85,7 +85,7 @@ tensorboard log들은 ```log/hp.dataset/``` directory에 저장됩니다. 그러
 # Train and synthesis results
 - 합성된 음성 샘플
 
-**FastSpeech2가 생성한 오디오 sample은 [여기](https://soundcloud.com/7vwcti7og4fp/sets/korean-fastspeech2-audio-samples-final)에서 들으실 수 있습니다.**
+**FastSpeech2가 생성한 오디오 sample은 [여기](https://soundcloud.com/7vwcti7og4fp/sets/korean-fastspeech2-improved-speech-quality)에서 들으실 수 있습니다.**
 
 - 학습 과정 시각화
 ![](./assets/tensorboard.png)
@@ -110,4 +110,4 @@ We specially thank to ming024 for providing FastSpeech2 pytorch-implentation. Th
 - [FastSpeech 2: Fast and High-Quality End-to-End Text to Speech](https://arxiv.org/abs/2006.04558), Y. Ren, *et al*.
 - [FastSpeech: Fast, Robust and Controllable Text to Speech](https://arxiv.org/abs/1905.09263), Y. Ren, *et al*.
 - [ming024's FastSpeech2 impelmentation](https://github.com/ming024/FastSpeech2)
-- [rishikksh20's VocGANimplementation](https://github.com/rishikksh20/VocGAN)
+- [rishikksh20's VocGAN implementation](https://github.com/rishikksh20/VocGAN)

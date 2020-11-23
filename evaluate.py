@@ -103,7 +103,7 @@ def evaluate(model, step, vocoder=None):
 
                         if hp.vocoder == "vocgan":
                             utils.vocgan_infer(mel_target_torch, vocoder, path=os.path.join(hp.eval_path, 'eval_groundtruth_{}_{}.wav'.format(basename, hp.vocoder)))   
-                            utils.vocgan_infer(mel_postnet_torch, vocoder, path=os.path.join(hp.eval_path, 'eval_{}_{}_{}.wav'.format(step, basename, hp.vocoder)))  
+                            utils.vocgan_infer(mel_postnet_torch, vocoder, path=os.path.join(hp.eval_path, 'eval_step_{}_{}_{}.wav'.format(step, basename, hp.vocoder)))  
                         np.save(os.path.join(hp.eval_path, 'eval_step_{}_{}_mel.npy'.format(step, basename)), mel_postnet.numpy())
                         
                         f0_ = f0[k, :gt_length]
@@ -167,10 +167,8 @@ if __name__ == "__main__":
     print('Number of FastSpeech2 Parameters:', num_param)
     
     # Load vocoder
-    if hp.vocoder == 'melgan':
-        vocoder = utils.get_melgan()
-    elif hp.vocoder == 'waveglow':
-        vocoder = utils.get_waveglow()
+    if hp.vocoder == 'vocgan':
+        vocoder = utils.get_vocgan(ckpt_path=hp.vocoder_pretrained_model_path)
     vocoder.to(device)
         
     # Init directories

@@ -45,7 +45,7 @@ def get_alignment(tier):
     phones = phones[:end_idx]
     durations = durations[:end_idx]
     
-    return phones, durations, start_time, end_time
+    return phones, np.array(durations), start_time, end_time
 
 def process_meta(meta_path):
     with open(meta_path, "r", encoding="utf-8") as f:
