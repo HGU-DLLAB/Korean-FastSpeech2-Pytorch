@@ -72,7 +72,7 @@ python synthesis.py --step 500000
 합성된 음성은  ```results/``` directory에서 확인하실 수 있습니다.
 
 # Pretrained model
-pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1iKslHiTfHasAddzyAlYT5eAaORYhPjFg/view?usp=sharing)해 주세요.
+pretrained model(checkpoint)을 [다운로드](https://drive.google.com/file/d/1qkFuNLqPIm-A5mZZDPGK1mnp0_Lh00PN/view?usp=sharing)해 주세요.
 그 후,  ```hparams.py```에 있는 ```checkpoint_path``` 변수에 기록된 경로에 위치시켜주시면 사전학습된 모델을 사용 가능합니다.
 
 # Tensorboard
