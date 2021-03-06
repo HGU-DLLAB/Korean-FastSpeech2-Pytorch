@@ -33,10 +33,16 @@ class VarianceAdaptor(nn.Module):
         log_duration_prediction = self.duration_predictor(x, src_mask)
         
         pitch_prediction = self.pitch_predictor(x, src_mask)
-        pitch_embedding = self.pitch_embedding_producer(pitch_prediction.unsqueeze(2))
-        
+        if pitch_target is not None:
+            pitch_embedding = self.pitch_embedding_producer(pitch_target.unsqueeze(2))
+        else:
+            pitch_embedding = self.pitch_embedding_producer(pitch_prediction.unsqueeze(2))
+    
         energy_prediction = self.energy_predictor(x, src_mask)
-        energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))
+        if energy_target is not None:
+            energy_embedding = self.energy_embedding_producer(energy_target.unsqueeze(2))
+        else:
+            energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))
 
         x = x + pitch_embedding + energy_embedding
 
