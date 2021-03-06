@@ -133,10 +133,6 @@ dmypy.json
 
 log/
 ckpt/
-data/korean_dataset
-data/kss_dataset
 results/
-preprocessed/
-text/for_testing
 eval/
 vocoder/pretrained_models/
