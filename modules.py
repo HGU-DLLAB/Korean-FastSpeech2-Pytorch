@@ -29,14 +29,14 @@ class VarianceAdaptor(nn.Module):
         self.energy_embedding_producer = Conv(1, hp.encoder_hidden, kernel_size=9, bias=False, padding=4)    
         self.pitch_embedding_producer = Conv(1, hp.encoder_hidden, kernel_size=9, bias=False, padding=4)
 
-    def forward(self, x, src_mask, mel_mask=None, duration_target=None, pitch_target=None, energy_target=None, max_len=None, pitch_energy_aug=None, f0_stat=None, energy_stat=None):
+    def forward(self, x, src_mask, mel_mask=None, duration_target=None, pitch_target=None, energy_target=None, max_len=None, dur_pitch_energy_aug=None, f0_stat=None, energy_stat=None):
         log_duration_prediction = self.duration_predictor(x, src_mask)
         
         pitch_prediction = self.pitch_predictor(x, src_mask)
         if pitch_target is not None:
             pitch_embedding = self.pitch_embedding_producer(pitch_target.unsqueeze(2))
         else:
-            pitch_prediction = utils.de_norm(pitch_prediction, mean=f0_stat[0], std=f0_stat[1]) * pitch_energy_aug[0]
+            pitch_prediction = utils.de_norm(pitch_prediction, mean=f0_stat[0], std=f0_stat[1]) * dur_pitch_energy_aug[1]
             pitch_prediction = utils.standard_norm_torch(pitch_prediction, mean=f0_stat[0], std=f0_stat[1])
             pitch_embedding = self.pitch_embedding_producer(pitch_prediction.unsqueeze(2))
     
@@ -44,7 +44,7 @@ class VarianceAdaptor(nn.Module):
         if energy_target is not None:
             energy_embedding = self.energy_embedding_producer(energy_target.unsqueeze(2))
         else:
-            energy_prediction = utils.de_norm(energy_prediction, mean=energy_stat[0], std=energy_stat[1]) * pitch_energy_aug[1]
+            energy_prediction = utils.de_norm(energy_prediction, mean=energy_stat[0], std=energy_stat[1]) * dur_pitch_energy_aug[2]
             energy_prediction = utils.standard_norm_torch(energy_prediction, mean=energy_stat[0], std=energy_stat[1])
             energy_embedding = self.energy_embedding_producer(energy_prediction.unsqueeze(2))   
 
@@ -53,7 +53,7 @@ class VarianceAdaptor(nn.Module):
         if duration_target is not None:
             x, mel_len = self.length_regulator(x, duration_target, max_len)
         else:
-            duration_rounded = torch.clamp(torch.round(torch.exp(log_duration_prediction)-hp.log_offset), min=0)
+            duration_rounded = torch.clamp(torch.round(torch.exp(log_duration_prediction)-hp.log_offset) * dur_pitch_energy_aug[0], min=0)
             x, mel_len = self.length_regulator(x, duration_rounded, max_len)
             mel_mask = utils.get_mask_from_lengths(mel_len)
         

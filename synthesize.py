@@ -52,7 +52,7 @@ def get_FastSpeech2(num):
     model.eval()
     return model
 
-def synthesize(model, vocoder, text, sentence, pitch_energy_aug, prefix=''):
+def synthesize(model, vocoder, text, sentence, dur_pitch_energy_aug, prefix=''):
     sentence = sentence[:10] # long filename will result in OS Error
 
     mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
@@ -65,7 +65,7 @@ def synthesize(model, vocoder, text, sentence, pitch_energy_aug, prefix=''):
 
     src_len = torch.from_numpy(np.array([text.shape[1]])).to(device)
         
-    mel, mel_postnet, log_duration_output, f0_output, energy_output, _, _, mel_len = model(text, src_len, pitch_energy_aug=pitch_energy_aug, f0_stat=f0_stat, energy_stat=energy_stat)    
+    mel, mel_postnet, log_duration_output, f0_output, energy_output, _, _, mel_len = model(text, src_len, dur_pitch_energy_aug=dur_pitch_energy_aug, f0_stat=f0_stat, energy_stat=energy_stat)    
 
     mel_torch = mel.transpose(1, 2).detach()
     mel_postnet_torch = mel_postnet.transpose(1, 2).detach()
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument('--step', type=int, default=30000)
     args = parser.parse_args()
 
-    pitch_energy_aug = [1.5, 1.5]    
+    dur_pitch_energy_aug = [1.0, 1.0, 1.0]    	# [duration, pitch, energy]
 
     model = get_FastSpeech2(args.step).to(device)
     if hp.vocoder == 'vocgan':
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     if mode != '4':
         for s in sentence:
             text = kor_preprocess(s)
-            synthesize(model, vocoder, text, s, pitch_energy_aug, prefix='step_{}-pitch_{}-energy_{}'.format(args.step, pitch_energy_aug[0], pitch_energy_aug[1]))
+            synthesize(model, vocoder, text, s, dur_pitch_energy_aug, prefix='step_{}-duration_{}-pitch_{}-energy_{}'.format(args.step, dur_pitch_energy_aug[0], dur_pitch_energy_aug[1], dur_pitch_energy_aug[2]))
     else:
         text = kor_preprocess(sentence)
-        synthesize(model, vocoder, text, sentence, pitch_energy_aug, prefix='step_{}-pitch_{}-energy_{}'.format(args.step, pitch_energy_aug[0], pitch_energy_aug[1]))
+        synthesize(model, vocoder, text, sentence, dur_pitch_energy_aug, prefix='step_{}-pitch_{}-energy_{}'.format(args.step, dur_pitch_energy_aug[0], dur_pitch_energy_aug[1], dur_pitch_energy_aug[2]))
