@@ -6,8 +6,8 @@ meta_name = "transcript.v.1.4.txt"	# "transcript.v.1.4.txt" or "transcript.v.1.3
 textgrid_name = "TextGrid.zip"
 
 ### set GPU number ###
-train_visible_devices = "0,1"
-synth_visible_devices = "1"
+train_visible_devices = "0"
+synth_visible_devices = "0"
 
 # Text
 text_cleaners = ['korean_cleaners']

@@ -198,7 +198,14 @@ def standard_norm(x, mean, std, is_mel=False):
     x[zero_idxs] = 0.0
     return x
 
-    return (x - mean) / std
+def standard_norm_torch(x, mean, std):
+
+    zero_idxs = torch.where(x == 0.0)[0]
+    x = (x - mean) / std
+    x[zero_idxs] = 0.0
+    return x
+
+
 
 def de_norm(x, mean, std):
     zero_idxs = torch.where(x == 0.0)[0]

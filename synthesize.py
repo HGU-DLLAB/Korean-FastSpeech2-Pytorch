@@ -52,12 +52,12 @@ def get_FastSpeech2(num):
     model.eval()
     return model
 
-def synthesize(model, vocoder, text, sentence, prefix=''):
+def synthesize(model, vocoder, text, sentence, pitch_energy_aug, prefix=''):
     sentence = sentence[:10] # long filename will result in OS Error
 
     mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
-    mean_f0, std_f0 = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "f0_stat.npy")), dtype=torch.float).to(device)
-    mean_energy, std_energy = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "energy_stat.npy")), dtype=torch.float).to(device)
+    mean_f0, std_f0 = f0_stat = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "f0_stat.npy")), dtype=torch.float).to(device)
+    mean_energy, std_energy = energy_stat = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "energy_stat.npy")), dtype=torch.float).to(device)
 
     mean_mel, std_mel = mean_mel.reshape(1, -1), std_mel.reshape(1, -1)
     mean_f0, std_f0 = mean_f0.reshape(1, -1), std_f0.reshape(1, -1)
@@ -65,8 +65,8 @@ def synthesize(model, vocoder, text, sentence, prefix=''):
 
     src_len = torch.from_numpy(np.array([text.shape[1]])).to(device)
         
-    mel, mel_postnet, log_duration_output, f0_output, energy_output, _, _, mel_len = model(text, src_len)
-    
+    mel, mel_postnet, log_duration_output, f0_output, energy_output, _, _, mel_len = model(text, src_len, pitch_energy_aug=pitch_energy_aug, f0_stat=f0_stat, energy_stat=energy_stat)    
+
     mel_torch = mel.transpose(1, 2).detach()
     mel_postnet_torch = mel_postnet.transpose(1, 2).detach()
     f0_output = f0_output[0]
@@ -95,7 +95,8 @@ if __name__ == "__main__":
     parser.add_argument('--step', type=int, default=30000)
     args = parser.parse_args()
 
-    
+    pitch_energy_aug = [1.5, 1.5]    
+
     model = get_FastSpeech2(args.step).to(device)
     if hp.vocoder == 'vocgan':
         vocoder = utils.get_vocgan(ckpt_path=hp.vocoder_pretrained_model_path)
@@ -128,7 +129,7 @@ if __name__ == "__main__":
     if mode != '4':
         for s in sentence:
             text = kor_preprocess(s)
-            synthesize(model, vocoder, text, s, prefix='step_{}'.format(args.step))
+            synthesize(model, vocoder, text, s, pitch_energy_aug, prefix='step_{}-pitch_{}-energy_{}'.format(args.step, pitch_energy_aug[0], pitch_energy_aug[1]))
     else:
         text = kor_preprocess(sentence)
-        synthesize(model, vocoder, text, sentence, prefix='step_{}'.format(args.step))
+        synthesize(model, vocoder, text, sentence, pitch_energy_aug, prefix='step_{}-pitch_{}-energy_{}'.format(args.step, pitch_energy_aug[0], pitch_energy_aug[1]))
