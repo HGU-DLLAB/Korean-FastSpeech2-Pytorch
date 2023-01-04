@@ -111,3 +111,8 @@ We specially thank to ming024 for providing FastSpeech2 pytorch-implentation. Th
 - [FastSpeech: Fast, Robust and Controllable Text to Speech](https://arxiv.org/abs/1905.09263), Y. Ren, *et al*.
 - [ming024's FastSpeech2 impelmentation](https://github.com/ming024/FastSpeech2)
 - [rishikksh20's VocGAN implementation](https://github.com/rishikksh20/VocGAN)
+
+
+# Note
+- 2023.01.04. 많은 분들이 Text-to-Wav Forced Alignment에 대한 질문을 주셔서 MFA를 구동하는 [tutorial code](https://github.com/Jackson-Kang/MFARunner)를 만들었습니다. 여러 한국어 dataset (KSS, 감정 음성합성 데이터셋(여성 단일화자, 7개 감정), EmotionTTS OpenDB (다화자 다감정 DB만 사용)에 대한 [code](https://github.com/Jackson-Kang/MFARunner/tree/main/dataset)가 있고, dataset만 다운 받으시면 바로 MFA 구동이 가능합니다. 연구에 도움이 되셨으면 좋겠습니다.
+
