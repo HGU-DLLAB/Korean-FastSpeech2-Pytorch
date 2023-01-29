@@ -25,8 +25,6 @@ from jamo import h2j
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def kor_preprocess(text):
-    text = text.rstrip(punctuation)
-    
     g2p=G2p()
     phone = g2p(text)
     print('after g2p: ',phone)
